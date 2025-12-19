@@ -1,5 +1,12 @@
 # HelpDmae — Sistema de Gerenciamento de Chamados Internos
 
+
+# Cores do Projeto
+
+* Branco / #ffffff
+* Cinza / #E2E1E3
+* Azul / #0078D4
+
 ## Descrição do Projeto - 
 
 O HelpDmae é uma aplicação web desenvolvida para gerenciar chamados internos dentro da empresa, funcionando como uma plataforma de suporte e comunicação entre setores, semelhante ao GLPI.
