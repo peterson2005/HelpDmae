@@ -1,0 +1,83 @@
+
+.header-home {
+    text-align: center;
+    color: white;
+    background-color: #0078D4;
+    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+body {
+    padding-top: 100px;   /* header */
+    padding-bottom: 80px; /* footer */
+    overflow: hidden;
+}
+
+
+.menu-home {
+    margin-top: 70px;
+    background-color: #3e9723;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    flex-wrap: wrap; 
+
+    width: 100%;
+}
+
+.menu-home > a {
+    color: black;
+    gap: 20px;
+    background-color: white;
+    margin: 5px;
+    justify-content: space-between;
+    padding: 5px;
+    border-radius: 10px;
+}
+.menu-home > button {
+    
+    margin-left: 10px;
+    align-content: left;
+    color: black;
+    gap: 20px;
+    background-color: white;
+    margin: 5px;
+    padding: 5px;
+}
+
+.home-container {
+    margin-top: 100px; /* altura do header */
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    flex-direction: line;
+    gap: 20px;
+    width: 500px;
+    padding: 25px;
+    border-radius: 30px;
+    margin-top: 50%;
+}
+
+.home-container >button {
+    background-color: #0078D4;
+    color: white;
+    padding: 40px;
+    border: none;
+    font-size: 30px;
+}
+
+
+.footer-home {
+    text-align: center;
+    color: white;
+    background-color: rgb(173, 173, 173);
+    padding: 20px;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
