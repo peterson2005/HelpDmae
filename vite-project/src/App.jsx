@@ -7,13 +7,14 @@ import Cadastro from './pages/Cadastro'
 import Home from './pages/Home'
 import NovoChamado from './pages/NovoChamado'
 import MeusChamados from './pages/MeusChamados'
+import Visualizar from './pages/Visualizar'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-      <MeusChamados />
+      <Visualizar />
     </>
   )
 }

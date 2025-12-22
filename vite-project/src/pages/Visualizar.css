@@ -1,0 +1,90 @@
+
+.header-visualizar {
+    text-align: center;
+    color: white;
+    background-color: #0078D4;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+}
+
+.header-visualizar > h1 {
+    height: 40px;
+}
+
+body {
+    align-items: center;
+}
+
+
+main {
+    background-color: #0078D4;
+    display: flex;
+    margin: 10px;
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 50px;
+    height: 750px;
+    width: 500px;
+    border-radius: 25px;
+}
+
+
+#visualizar-meuschamados {
+    font-size: 30px;
+    padding: 5px;
+}
+
+#chamado {
+    background-color: #E2E2E2;
+    border-radius: 25px;
+    padding: 15px;
+    margin: 5px;
+    width: 480px;
+
+}
+
+#descreva-chamado-visualizar1 {
+    text-align: left;
+    padding: 5px;
+}
+#descreva-chamado-visualizar2 {
+    color: white;
+    border-radius: 25px;
+    background-color: #0078D4;
+    font-size: 13px;
+    padding: 5px;
+}
+
+#up-visualizar {
+    display: flex;
+    flex-direction: row;
+}
+
+#donw-visualizar {
+    background-color: rgb(255, 255, 255);
+    border-radius: 25px;
+    padding: 10px;
+    font-size: 15px;
+    margin: 10px;
+    height: 445px;
+
+}
+
+#button-visualizar {
+    display: flex;
+    flex-direction: row;
+    margin-top: 170px;
+}
+
+#button-visualizar > button {
+    background-color: #0078D4;
+    margin: 10px;
+    padding: 10px;
+    color: white;
+    margin-top: 100px;
+    font-size: 20px;
+}
