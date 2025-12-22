@@ -1,0 +1,67 @@
+.header-MeusChamados {
+    text-align: center;
+    color: white;
+    background-color: #0078D4;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+}
+
+.header-MeusChamados > h1 {
+    height: 40px;
+}
+
+#title-meuschamados {
+    margin-top: 170px;
+    color: black;
+    text-align: left;
+    font-size: 50px;
+}
+
+#container-meuschamados {
+    margin-top: 170px;
+    padding: 30px;
+    color: white;
+    display: flex;
+    flex-direction: row;
+}
+
+#container-meuschamados {
+    margin-top: 20px;
+    padding: 20px;
+    color: white;
+    display: flex;
+    flex-direction: row;
+    height: 650px;
+}
+
+#container-meuschamados > ul {
+    list-style: none;
+    display: flex;
+    height: 648px;
+    flex-direction: column;
+    padding: 0; /* Remove padding padrão da ul */
+    margin: 0; /* Remove margin padrão da ul */
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+}
+
+#container-meuschamados > ul > li {
+    background-color: #0078D4;
+    display: flex;
+    height: 30px;
+    flex-direction: row;
+    padding: 20px;
+    margin: 5px;
+    align-items: center; /* Alinha verticalmente no centro */
+    gap: 20px; /* Espaçamento entre os elementos */
+    border-radius: 25px;
+}
+
+/* Remove margens padrão dos elementos internos */
+#container-meuschamados > ul > li > * {
+    margin: 0;
+}
