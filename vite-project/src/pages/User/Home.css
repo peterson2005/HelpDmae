@@ -55,7 +55,7 @@ body {
 }
 
 .home-container {
-    margin-top: 100px; /* altura do header */
+    margin-top: 200px; /* altura do header */
     font-family: 'Segoe UI', Arial, sans-serif;
     display: flex;
     flex-direction: line;
@@ -63,7 +63,6 @@ body {
     width: 500px;
     padding: 25px;
     border-radius: 30px;
-    margin-top: 50%;
 }
 
 .home-container >button {

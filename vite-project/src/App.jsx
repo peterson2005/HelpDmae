@@ -1,23 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Login from './pages/Login'
-import Cadastro from './pages/Cadastro'
-import Home from './pages/Home'
-import NovoChamado from './pages/NovoChamado'
-import MeusChamados from './pages/MeusChamados'
-import Visualizar from './pages/Visualizar'
-import Principal from './pages/Principal'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Login from "./pages/User/Login.jsx";
+import Home from "./pages/User/Home.jsx";
+import NovoChamado from "./pages/User/NovoChamado.jsx";
+import MeusChamados from "./pages/User/MeusChamados.jsx";
+import Cadastro from "./pages/User/Cadastro.jsx";
+import EsqueciSenha from "./pages/User/EsqueciSenha.jsx";
+import Visualizar from "./pages/User/Visualizar.jsx";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <Principal />
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/Home" element={<Home />} />
+        <Route path="/Novo-Chamado" element={<NovoChamado />} />
+        <Route path="/Meus-Chamados" element={<MeusChamados />} />
+        <Route path="/Visualizar" element={<Visualizar />} />
+        <Route path="/Cadastro" element={<Cadastro />} />
+        <Route path="/EsqueciSenha" element={<EsqueciSenha />} />
+        <Route path="/visualizar/:id" element={<Visualizar />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

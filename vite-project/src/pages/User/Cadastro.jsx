@@ -1,8 +1,10 @@
 import "./Cadastro.css";
+import BotaoVoltar from "../../Componentes/BotaoVoltar.jsx";
 
 export default function Cadastro() {
   return (
     <div>
+      <BotaoVoltar />
         <div className="cadastro-container">
             <form action="" className="form-cadastro">
 
