@@ -41,7 +41,7 @@ export default function NovoChamado() {  // Aqui começa o componente da tela
     data: new Date().toLocaleDateString(),
     hora: new Date().toLocaleTimeString().slice(0, 5),
     descricao,
-    status: "Não solucionado"
+    status: "aberto"
   };
 
   chamadosSalvos.push(novoChamado);
