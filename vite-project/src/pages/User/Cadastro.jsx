@@ -2,6 +2,8 @@ import "./Cadastro.css";
 import BotaoVoltar from "../../Componentes/BotaoVoltar.jsx";
 
 export default function Cadastro() {
+  const [nome, setNome] = useState();
+
   return (
     <div>
       <BotaoVoltar />
@@ -9,7 +11,7 @@ export default function Cadastro() {
             <form action="" className="form-cadastro">
 
                 <p className="p-cadastro">Nome Completo</p>
-                <input type="text" placeholder="Nome Completo" /> 
+                <input type="text" value={nome} onChange={(event) => setNome(event.target.value) } placeholder="Nome Completo" /> 
 
                 <p className="p-cadastro">E-mail (resete de senha)</p>
                 <input type="email" placeholder="E-mail (resete de senha)" /> 

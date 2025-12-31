@@ -106,7 +106,7 @@ function gerarProximoId(chamados) {
                 <div id="fim-chamado">
                     <div id="datas">
                         <p><strong>Data Abertura: 12/08/2025 15:53</strong></p>
-                        <p><strong>Data P/ Solução: 14/08/2025 17:00</strong></p>
+                        <p><strong>Data p/ Solução: 14/08/2025 17:00</strong></p>
                     </div>
                     <button id="button-abrirchamado" onClick={abrirChamado}>Abrir Chamado</button>
                 </div>
