@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Paper,
@@ -20,9 +21,13 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false); // Para esconder e mostrar a senha
 
 
+  const navigate = useNavigate();  // rotas navegacao
+
+
   function handleSubmit(e) {
-    e.preventDefault();
-    console.log({ email, password });  // Função de submit | preventDefault() impede o reload da página | console.log simula o envio para o backend
+    e.preventDefault(); // Impede o reload da página
+    console.log({ email, password }); 
+    navigate("/home"); 
   }
 
   return (
@@ -102,14 +107,14 @@ export default function Login() {
               ),
             }}
           />
-            <Box sx={{ display: "flex", justifyContent: "space-between"  }}>
-              <Link href="#" variant="body2" sx={{ mt: 2 }} >
-                Esqueceu a senha ?
-              </Link>
-            </Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Link href="#" variant="body2" sx={{ mt: 2 }} >
+              Esqueceu a senha ?
+            </Link>
+          </Box>
 
           <Button
-            type="submit"
+            type="submit" // Este tipo já avisa ao formulário para executar o handleSubmit
             fullWidth
             size="large"
             variant="contained"
