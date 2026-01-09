@@ -27,7 +27,7 @@ export default function Login() {
   function handleSubmit(e) {
     e.preventDefault(); // Impede o reload da página
     console.log({ email, password }); 
-    navigate("/home"); 
+    navigate("/"); 
   }
 
   return (
