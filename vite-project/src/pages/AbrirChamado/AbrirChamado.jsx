@@ -1,7 +1,10 @@
+import axios from 'axios';
+import { useState } from 'react';
+
 import { useNavigate } from "react-router-dom";
 import {
   Stack, Grid, Paper, Typography, Box, TextField,
-  Button, MenuItem, Card, CardActionArea, List, ListItem, 
+  Button, MenuItem, Card, CardActionArea, List, ListItem,
   IconButton, Tooltip, Divider
 } from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -20,10 +23,31 @@ export default function AbrirChamado() {
     { label: "Ramal", value: "1234" },
   ];
 
+  const [formData, setFormData] = useState({
+    titulo: '',
+    descricao: '',
+    tipo: 'Incidente',
+    impacto: 'Individual',
+    categoria_id: 1, // Ex: Hardware
+    usuario_id: 1    // ID do João Silva que criamos
+  });
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post('http://localhost:5000/chamados', formData);
+      alert("Chamado aberto com sucesso!");
+      navigate('/meus-chamados');
+    } catch (error) {
+      console.error("Erro ao enviar:", error);
+      alert("Erro ao abrir chamado.");
+    }
+  };
+
   return (
-    <Box sx={{ 
-      p: { xs: 2, md: 4 }, 
-      backgroundColor: "#f4f6f8", 
+    <Box sx={{
+      p: { xs: 2, md: 4 },
+      backgroundColor: "#f4f6f8",
       minHeight: "100vh",
       display: "flex",
       justifyContent: "center", // Centraliza horizontalmente
@@ -31,7 +55,7 @@ export default function AbrirChamado() {
     }}>
       {/* Aumentei o maxWidth para 1400px para ocupar mais a tela cheia */}
       <Paper elevation={3} sx={{ p: 5, borderRadius: 3, width: "100%", maxWidth: 1400 }}>
-        
+
         <Box sx={{ textAlign: "center", mb: 6 }}>
           <Typography variant="h4" fontWeight="bold" sx={{ color: '#1c252e' }}>
             Abrir Chamado
@@ -42,17 +66,17 @@ export default function AbrirChamado() {
         </Box>
 
         <Grid container spacing={6} justifyContent="center">
-          
+
           {/* COLUNA ESQUERDA: Agora com md={6} para ficar equilibrado */}
           <Grid item xs={12} md={6}>
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-               Informações do Solicitante
+              Informações do Solicitante
             </Typography>
-            
-            <List sx={{ 
-              mb: 4, 
-              bgcolor: '#fafafa', 
-              borderRadius: 2, 
+
+            <List sx={{
+              mb: 4,
+              bgcolor: '#fafafa',
+              borderRadius: 2,
               border: '1px solid #e0e0e0',
               width: "100%" // Garante que use toda a largura da coluna
             }}>
@@ -86,8 +110,11 @@ export default function AbrirChamado() {
               Descrição do Problema
             </Typography>
             <Stack spacing={3}>
-              <TextField fullWidth label="Título do Chamado" placeholder="Ex: Erro ao acessar o sistema ERP" />
-              <TextField fullWidth multiline rows={8} label="Descrição Detalhada" placeholder="Descreva aqui o que aconteceu..." />
+              <TextField fullWidth label="Título do Chamado"
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })} placeholder="Ex: Erro ao acessar o sistema ERP" />
+              <TextField fullWidth multiline rows={8} label="Descrição Detalhada" value={formData.descricao}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })} placeholder="Descreva aqui o que aconteceu..." />
             </Stack>
           </Grid>
 
@@ -96,7 +123,8 @@ export default function AbrirChamado() {
             <Stack spacing={4}>
               <Box>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>Classificação e Impacto</Typography>
-                <TextField select fullWidth label="Tipo de Solicitação" defaultValue="incidente" sx={{ mb: 3 }}>
+                <TextField select fullWidth label="Tipo de Solicitação" value={formData.tipo}
+                  onChange={(e) => setFormData({ ...formData, tipo: e.target.value })} defaultValue="incidente" sx={{ mb: 3 }}>
                   <MenuItem value="solicitacao">Solicitação (Pedido de algo novo)</MenuItem>
                   <MenuItem value="incidente">Incidente (Algo parou de funcionar)</MenuItem>
                 </TextField>
@@ -104,25 +132,42 @@ export default function AbrirChamado() {
                 <Typography variant="body2" fontWeight="600" sx={{ mb: 1 }}>Categoria Principal</Typography>
                 <Grid container spacing={2}>
                   <Grid item xs={6}>
-                    <Card variant="outlined" sx={{ borderColor: 'primary.main', bgcolor: '#f0f7ff' }}>
+                    <Card
+                      variant="outlined"
+                      onClick={() => setFormData({ ...formData, categoria_id: 1 })} // ID 1 = Hardware
+                      sx={{
+                        cursor: 'pointer',
+                        borderColor: formData.categoria_id === 1 ? 'primary.main' : 'divider',
+                        bgcolor: formData.categoria_id === 1 ? '#f0f7ff' : 'inherit'
+                      }}
+                    >
                       <CardActionArea sx={{ p: 4, textAlign: 'center' }}>
-                        <ComputerIcon color="primary" sx={{ fontSize: 40 }} />
-                        <Typography variant="body1" fontWeight="bold">Hardware</Typography>
+                        <ComputerIcon color={formData.categoria_id === 1 ? "primary" : "action"} sx={{ fontSize: 40 }} />
+                        <Typography variant="body1" fontWeight={formData.categoria_id === 1 ? "bold" : "normal"}>Hardware</Typography>
                       </CardActionArea>
                     </Card>
                   </Grid>
                   <Grid item xs={6}>
-                    <Card variant="outlined">
+                    <Card
+                      variant="outlined"
+                      onClick={() => setFormData({ ...formData, categoria_id: 2 })} // ID 2 = Software
+                      sx={{
+                        cursor: 'pointer',
+                        borderColor: formData.categoria_id === 2 ? 'primary.main' : 'divider',
+                        bgcolor: formData.categoria_id === 2 ? '#f0f7ff' : 'inherit'
+                      }}
+                    >
                       <CardActionArea sx={{ p: 4, textAlign: 'center' }}>
-                        <CodeIcon color="action" sx={{ fontSize: 40 }} />
-                        <Typography variant="body1">Software</Typography>
+                        <CodeIcon color={formData.categoria_id === 2 ? "primary" : "action"} sx={{ fontSize: 40 }} />
+                        <Typography variant="body1" fontWeight={formData.categoria_id === 2 ? "bold" : "normal"}>Software</Typography>
                       </CardActionArea>
                     </Card>
                   </Grid>
                 </Grid>
               </Box>
 
-              <TextField select fullWidth label="Impacto no Trabalho" defaultValue="setor">
+              <TextField select fullWidth label="Impacto no Trabalho" value={formData.impacto}
+                onChange={(e) => setFormData({ ...formData, impacto: e.target.value })} defaultValue="setor">
                 <MenuItem value="eu">Apenas no meu computador</MenuItem>
                 <MenuItem value="setor">Afeta todo o meu setor</MenuItem>
                 <MenuItem value="empresa">Afeta a unidade inteira</MenuItem>
@@ -147,18 +192,19 @@ export default function AbrirChamado() {
         </Grid>
 
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 8 }}>
-          <Button 
-            variant="outlined" 
+          <Button
+            variant="outlined"
             size="large"
-            sx={{ px: 8, py: 1.5, fontWeight: 'bold' }} 
+            sx={{ px: 8, py: 1.5, fontWeight: 'bold' }}
             onClick={() => navigate(-1)}
           >
             CANCELAR
           </Button>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             size="large"
             sx={{ px: 10, py: 1.5, fontWeight: 'bold', boxShadow: 4 }}
+            onClick={handleSubmit}
           >
             ENVIAR CHAMADO
           </Button>
