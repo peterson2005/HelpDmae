@@ -114,12 +114,7 @@ export default function MeusChamados() {
                   {/* ... botões de ação */}
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                      <Tooltip title="Ver Detalhes">
-                        <IconButton size="small" color="primary">
-                          {/* Verifique se importou VisibilityIcon no topo */}
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                      
                       <Button
                         size="small"
                         variant="outlined"
