@@ -1,177 +1,147 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box, Grid, Paper, Typography, Chip, Divider,
-    Stack, Avatar, Button, TextField, Container
+    Stack, Avatar, Button, TextField, Container, IconButton
 } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import PersonIcon from '@mui/icons-material/Person';
+import DescriptionIcon from '@mui/icons-material/Description';
 import SendIcon from '@mui/icons-material/Send';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import { useNavigate } from 'react-router-dom';
 
 export default function DetalhesChamado() {
     const navigate = useNavigate();
 
     return (
-        <Box sx={{ backgroundColor: "#f0f2f5", minHeight: "100vh", py: 4 }}>
-            <Container maxWidth="xl">
+        <Box sx={{ backgroundColor: "#eef2f6", minHeight: "100vh", py: 6 }}>
+            <Container maxWidth="lg">
+                <Paper elevation={0} sx={{ borderRadius: 8, p: 4, bgcolor: '#fff', boxShadow: '0px 10px 30px rgba(0,0,0,0.05)' }}>
 
-                <Button
-                    startIcon={<ArrowBackIcon />}
-                    onClick={() => navigate(-1)}
-                    sx={{ mb: 2, fontWeight: 'bold', color: '#637381' }}
-                >
-                    Voltar para a Lista
-                </Button>
-
-                <Paper elevation={4} sx={{ borderRadius: 4, overflow: 'hidden', minHeight: '85vh' }}>
-
-                    {/* CABEÇALHO: Título e Data/Hora */}
-                    <Box sx={{ p: 4, borderBottom: '1px solid #eee', bgcolor: '#fff' }}>
-                        <Grid container justifyContent="space-between" alignItems="center">
-                            <Grid item xs={12} md={8}>
-                                <Typography variant="caption" color="primary" fontWeight="bold" sx={{ letterSpacing: 1 }}>
-                                    CHAMADO #2024-0014
-                                </Typography>
-                                <Typography variant="h4" fontWeight="800" color="#1c252e" sx={{ my: 1 }}>
-                                    Erro Crítico no Sistema ERP
-                                </Typography>
-                                <Stack direction="row" spacing={2} alignItems="center" color="text.secondary">
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                        <AccessTimeIcon fontSize="small" />
-                                        <Typography variant="body2">Aberto em: <b>12/01/2026</b> às <b>14:30</b></Typography>
-                                    </Box>
-                                    <Chip label="EM ATENDIMENTO" size="small" sx={{ bgcolor: '#fff3e0', color: '#ff9800', fontWeight: 'bold' }} />
-                                </Stack>
-                            </Grid>
-                        </Grid>
+                    {/* CABEÇALHO COM STATUS E PRIORIDADE */}
+                    <Box sx={{ mb: 4 }}>
+                        <Typography variant="h4" fontWeight="800" color="#1e293b" gutterBottom>
+                            Chamado #2023-0014
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                            <Chip label="Status: Concluido" sx={{ bgcolor: '#10b981', color: '#fff', fontWeight: 'bold' }} />
+                            <Chip label="Prioridade: Alta" sx={{ bgcolor: '#991b1b', color: '#fff', fontWeight: 'bold' }} />
+                        </Stack>
                     </Box>
 
-                    <Grid container sx={{ minHeight: '70vh' }}>
+                    <Grid container spacing={4} alignItems="stretch">
+                        {/* COLUNA ESQUERDA: DESCRIÇÃO PRINCIPAL */}
+                        <Grid container spacing={4} alignItems="stretch">
 
-                        {/* COLUNA DA ESQUERDA: Conteúdo e Comentários */}
-                        <Grid item xs={12} md={8} sx={{ p: 4, bgcolor: '#fff', display: 'flex', flexDirection: 'column' }}>
+                            {/* COLUNA ESQUERDA */}
+                            <Grid item xs={12} md={7}>
+                                <Box sx={{
+                                    bgcolor: '#dfeaf5',
+                                    p: 4,
+                                    borderRadius: 6,
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column'
+                                }}>
 
-                            <Box sx={{ flexGrow: 1 }}>
-                                <Typography variant="h6" fontWeight="bold" gutterBottom>
-                                    Descrição da Ocorrência
-                                </Typography>
-                                <Paper
-                                    variant="outlined"
-                                    sx={{
-                                        p: 3,
-                                        mb: 4,
-                                        borderRadius: 3,
-                                        bgcolor: '#f8fafd', // Um azul bem clarinho para destacar
-                                        border: '1px solid #e3e8ef'
-                                    }}
-                                >
-                                    <Typography variant="subtitle2" color="primary" fontWeight="bold" gutterBottom>
-                                        DESCRIÇÃO DA OCORRÊNCIA
+                                    {/* 🔹 TÍTULO AO LADO DA COLUNA DIREITA */}
+                                    <Typography variant="h5" fontWeight="700" color="#1e293b" sx={{ mb: 2 }}>
+                                        Erro Crítico no Sistema ERP
                                     </Typography>
-                                    <Typography variant="body1" color="text.primary" sx={{ lineHeight: 1.8, fontWeight: 500 }}>
-                                        Ao tentar gerar o relatório financeiro mensal, o sistema trava completamente e exibe uma mensagem de erro com códigos aleatórios. O problema persiste mesmo após reiniciar o computador e afeta todos os usuários do setor financeiro.
+
+                                    <Typography variant="subtitle1" fontWeight="bold" color="#64748b" sx={{ mb: 1 }}>
+                                        Descrição Detalhada
                                     </Typography>
-                                </Paper>
 
-                                <Divider sx={{ my: 4 }} />
-
-                                <Divider sx={{ my: 4 }} />
-
-                                
-                            </Box>
-
-                            {/* CAMPO DE COMENTÁRIO: Fica por último no conteúdo */}
-                        </Grid>
-
-                        {/* COLUNA DA DIREITA (LATERAL): Solicitante e Classificação */}
-                        <Grid item xs={12} md={4} sx={{ p: 4, bgcolor: '#fcfcfc', borderLeft: '1px solid #eee' }}>
-
-                            {/* SOLICITANTE */}
-
-                            <Box sx={{ mb: 5 }}>
-                                <Typography variant="overline" color="text.secondary" fontWeight="bold">SOLICITANTE</Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2, mb: 3 }}>
-                                    <Avatar sx={{ width: 56, height: 56, bgcolor: '#e3f2fd', color: '#1976d2' }}>
-                                        <PersonIcon fontSize="large" />
-                                    </Avatar>
-                                    <Box>
-                                        <Typography variant="body1" fontWeight="bold">João Silva</Typography>
-                                        <Typography variant="body2" color="textSecondary">Analista Financeiro</Typography>
-                                    </Box>
+                                    <Typography variant="body1" color="#334155">
+                                        Erro Crítico no sistema de gestão. Ao tentar gerar relatórios, o sistema apresenta instabilidade e impede a conclusão dos processos financeiros, afetando a operação da matriz.
+                                    </Typography>
                                 </Box>
-                                <Stack spacing={1.5}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography variant="body2" color="textSecondary">Setor:</Typography>
-                                        <Typography variant="body2" fontWeight="500">Financeiro / Matriz</Typography>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Typography variant="body2" color="textSecondary">Ramal:</Typography>
-                                        <Typography variant="body2" fontWeight="500">1234</Typography>
-                                    </Box>
-                                </Stack>
-                            </Box>
+                            </Grid>
 
-                            <Divider sx={{ mb: 4 }} />
+                            {/* COLUNA DIREITA */}
+                            <Grid item xs={12} md={5}>
+                                <Stack spacing={3} sx={{ height: '100%' }}>
 
-                            {/* CLASSIFICAÇÃO */}
-                            <Box>
-                                <Typography variant="overline" color="text.secondary" fontWeight="bold">DETALHES DA SOLICITAÇÃO</Typography>
-                                <Stack spacing={2} sx={{ mt: 2 }}>
                                     <Box>
-                                        <Typography variant="caption" sx={{ opacity: 0.7, display: 'block' }}>Tipo de Chamado</Typography>
-                                        <Typography variant="body2" fontWeight="bold">Incidente de Software</Typography>
+                                        <Typography variant="h6" fontWeight="bold" color="#1e293b">
+                                            Informações de Solicitante
+                                        </Typography>
+
+                                        <Typography variant="body2" color="#64748b" sx={{ mt: 1 }}>
+                                            <b>Nome:</b> João Silva <br />
+                                            <b>Cargo:</b> Analista de Sistemas <br />
+                                            <b>Setor:</b> TI <br />
+                                            <b>Ramal:</b> 1234
+                                        </Typography>
                                     </Box>
+
+                                    <Divider />
+
                                     <Box>
-                                        <Typography variant="caption" sx={{ opacity: 0.7, display: 'block' }}>Categoria Principal</Typography>
-                                        <Typography variant="body2" fontWeight="bold">Sistemas ERP</Typography>
+                                        <Typography variant="h6" fontWeight="bold" color="#1e293b">
+                                            Classificação e Impacto
+                                        </Typography>
+
+                                        <Typography variant="body2" color="#64748b" sx={{ mt: 1 }}>
+                                            <b>Tipo:</b> Incidente <br />
+                                            <b>Impacto:</b> Setor
+                                        </Typography>
                                     </Box>
+
+                                    <Divider />
+
                                     <Box>
-                                        <Typography variant="caption" sx={{ opacity: 0.7, display: 'block' }}>Impacto</Typography>
-                                        <Chip label="Setorial" size="small" color="error" sx={{ fontWeight: 'bold', mt: 0.5 }} />
+                                        <Typography variant="h6" fontWeight="bold" color="#1e293b" sx={{ mb: 1 }}>
+                                            Anexos
+                                        </Typography>
+
+                                        <Stack direction="row" spacing={1} flexWrap="wrap">
+                                            <Button startIcon={<DescriptionIcon />} variant="contained" size="small">
+                                                log_error1.png
+                                            </Button>
+                                            <Button startIcon={<DescriptionIcon />} variant="contained" size="small">
+                                                screenshot.jpg
+                                            </Button>
+                                        </Stack>
                                     </Box>
+
                                 </Stack>
-                            </Box>
+                            </Grid>
 
-                            <Box sx={{ mt: 6, p: 3, bgcolor: '#1c252e', borderRadius: 4, color: '#fff' }}>
-                                <Typography variant="caption" sx={{ opacity: 0.7 }}>Tempo Restante (SLA)</Typography>
-                                <Typography variant="h5" fontWeight="bold">02:15:00</Typography>
-                            </Box>
-
-                            <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
-                                    Histórico de Mensagens
-                                </Typography>
-
-                                {/* Exemplo de Comentário Existente */}
-                                <Stack spacing={3} sx={{ mb: 4 }}>
-                                    <Box sx={{ display: 'flex', gap: 2 }}>
-                                        <Avatar sx={{ bgcolor: '#1976d2' }}>IT</Avatar>
-                                        <Box sx={{ bgcolor: '#f8f9fa', p: 2, borderRadius: 3, flex: 1 }}>
-                                            <Typography variant="subtitle2" fontWeight="bold">Suporte Nível 2 (Adriano)</Typography>
-                                            <Typography variant="body2">Logs do sistema identificados. Estamos verificando a conexão com o banco de dados.</Typography>
-                                            <Typography variant="caption" color="text.secondary">14:45</Typography>
-                                        </Box>
-                                    </Box>
-                                </Stack>
-                            <Box sx={{ pt: 2, borderTop: '1px solid #eee' }}>
-                                <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>Adicionar Comentário</Typography>
-                                <Box sx={{ display: 'flex', gap: 2 }}>
-                                    <TextField
-                                        fullWidth
-                                        variant="outlined"
-                                        placeholder="Digite sua atualização ou dúvida aqui..."
-                                        multiline
-                                        rows={2}
-                                        sx={{ bgcolor: '#fff' }}
-                                    />
-                                    <Button variant="contained" sx={{ px: 4, borderRadius: 2, height: '56px' }}>
-                                        <SendIcon />
-                                    </Button>
-                                </Box>
-                            </Box>
                         </Grid>
 
                     </Grid>
+
+                    {/* HISTÓRICO DE ATIVIDADES (PARTE INFERIOR) */}
+                    <Box sx={{ mt: 6 }}>
+                        <Typography variant="h6" fontWeight="bold" color="#1e293b" sx={{ mb: 3 }}>
+                            Histórico de Atividades
+                        </Typography>
+
+                        <Stack spacing={2} sx={{ mb: 4 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Typography variant="body2" color="#64748b">🕒 15/05/2024 09:30 - Chamado aberto por João Silva</Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <Typography variant="body2" color="#64748b">🕒 15/05/2024 10:00 - Atribuído ao Pedro Souza: "Correção aplicada."</Typography>
+                            </Box>
+                        </Stack>
+
+                        {/* INPUT DE COMENTÁRIO ESTILO IMAGEM */}
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                placeholder="Adicionar Comentário"
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
+                            />
+                            <Button
+                                variant="contained"
+                                sx={{ bgcolor: '#0085db', px: 4, borderRadius: 2, height: '40px', fontWeight: 'bold' }}
+                            >
+                                Enviar
+                            </Button>
+                        </Box>
+                    </Box>
+
                 </Paper>
             </Container>
         </Box>
