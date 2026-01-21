@@ -66,3 +66,40 @@ app.post('/chamados', async (req, res) => {
     res.status(500).send("Erro ao salvar chamado");
   }
 });
+
+
+app.get('/chamados/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Query ajustada para o seu esquema exato
+    const result = await pool.query(`
+      SELECT 
+        c.id_chamados AS id, 
+        c.titulo, 
+        c.descricao, 
+        c.tipo, 
+        c.impacto,
+        cat.nome AS categoria_nome, 
+        s.nome AS status_nome,
+        u.nome AS solicitante_nome,
+        setor.nome AS setor_nome,
+        TO_CHAR(c.data_criacao, 'DD/MM/YYYY HH24:MI') AS data_formatada
+      FROM chamados c
+      LEFT JOIN status s ON c.status_id = s.id_status
+      LEFT JOIN categorias cat ON c.categoria_id = cat.id_categorias
+      LEFT JOIN usuarios u ON c.solicitante = u.id_usuarios
+      LEFT JOIN setores setor ON u.setor_id = setor.id_setores
+      WHERE c.id_chamados = $1
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Chamado não encontrado no banco" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Erro no Banco:", err.message);
+    res.status(500).send("Erro interno no servidor");
+  }
+});
