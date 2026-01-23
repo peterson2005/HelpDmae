@@ -16,19 +16,52 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 export default function Login() {
-  const [email, setEmail] = useState("");  // armazena o valor do email
-  const [password, setPassword] = useState("");  // armazena o valor da senha
-  const [showPassword, setShowPassword] = useState(false); // Para esconder e mostrar a senha
+  const [matricula, setMatricula] = useState("");  // armazena o valor do email
+  const [senha, setSenha] = useState("");  // armazena o valor da senha
+  const [showSenha, setShowSenha] = useState(false); // Para esconder e mostrar a senha
 
 
   const navigate = useNavigate();  // rotas navegacao
 
 
-  function handleSubmit(e) {
-    e.preventDefault(); // Impede o reload da página
-    console.log({ email, password }); 
-    navigate("/"); 
+  async function handleSubmit(e) {
+    e.preventDefault(); // Passo 1: Impede que a página recarregue
+
+    // Passo 2: Criar o objeto com o que foi digitado
+    const dadosLogin = {
+  matricula: matricula, // agora usa o nome correto
+  senha: senha
+};
+
+    console.log("Tentando logar com:", dadosLogin);
+
+    try {
+      const resposta = await fetch("http://localhost:5000/login", {
+        method: "POST", // Tipo de envio
+        headers: {
+          "Content-Type": "application/json", // Avisa que estamos enviando JSON
+        },
+        body: JSON.stringify(dadosLogin), // Transforma o objeto em texto para a rede
+      });
+
+      const resultado = await resposta.json(); // Espera a resposta do Node
+
+      if (resposta.ok) {
+        console.log("Sucesso!", resultado);
+
+        // PASSO A: Salvar os dados do usuário no "pendrive" do navegador
+        // resultado.user contém (nome, cargo, setor, ramal, id) que seu node enviou
+        localStorage.setItem("usuarioLogado", JSON.stringify(resultado.user));
+
+        // PASSO B: Navegar para a tela principal
+        navigate("/");
+      }
+    } catch (erro) {
+      console.error("Erro ao conectar com a API:", erro);
+    }
   }
+
+
 
   return (
     <Box
@@ -79,29 +112,29 @@ export default function Login() {
 
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
-            label="Matrícula"
-            fullWidth
-            margin="normal"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+  label="Matrícula"
+  fullWidth
+  margin="normal"
+  value={matricula}
+  onChange={(e) => setMatricula(e.target.value)}
+/>
 
 
           <TextField
-            label="Password"
-            type={showPassword ? "text" : "password"}
+            label="senha"
+            type={showSenha ? "text" : "senha"}
             fullWidth
             margin="normal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowSenha(!showSenha)}
                     edge="end"
                   >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showSenha ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
               ),

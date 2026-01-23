@@ -1,72 +1,204 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // Adicionei useCallback
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
     Box, Grid, Paper, Typography, Chip, Divider,
-    Stack, Avatar, Button, TextField, Container, IconButton
+    Stack, Button, TextField, Container
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
-import SendIcon from '@mui/icons-material/Send';
-
 
 export default function DetalhesChamado() {
+    const navigate = useNavigate();
     const { id } = useParams();
+    
     const [chamado, setChamado] = useState(null);
+    const [comentarios, setComentarios] = useState([]);
+    const [novoComentario, setNovoComentario] = useState("");
 
-    useEffect(() => {
-        const buscarNoBanco = async () => {
-            try {
-                const resposta = await axios.get(`http://localhost:5000/chamados/${id}`);
-                setChamado(resposta.data);
-            } catch (error) {
-                console.error("Erro ao buscar dados:", error);
-            }
-        };
-        if (id) buscarNoBanco();
+    // 1. Função para buscar o chamado
+    const buscarDadosChamado = useCallback(async () => {
+        try {
+            const resposta = await axios.get(`http://localhost:5000/chamados/${id}`);
+            setChamado(resposta.data);
+        } catch (error) {
+            console.error("Erro ao buscar dados do chamado:", error);
+        }
     }, [id]);
 
+    // 2. Função para buscar os comentários
+    const buscarComentarios = useCallback(async () => {
+        try {
+            const res = await axios.get(`http://localhost:5000/chamados/${id}/interacoes`);
+            setComentarios(res.data);
+        } catch (err) {
+            console.error("Erro ao buscar histórico", err);
+        }
+    }, [id]);
+
+    // 3. useEffect Único (Roda uma vez quando entra na tela)
+    useEffect(() => {
+        if (id) {
+            buscarDadosChamado();
+            buscarComentarios();
+        }
+    }, [id, buscarDadosChamado, buscarComentarios]);
+
+    const handleEnviarComentario = async () => {
+        if (!novoComentario.trim()) return;
+
+        const usuarioGuardado = localStorage.getItem("usuarioLogado");
+        if (!usuarioGuardado) {
+            alert("Sessão expirada. Faça login novamente.");
+            return;
+        }
+
+        const usuarioLogado = JSON.parse(usuarioGuardado);
+        
+        try {
+            await axios.post(`http://localhost:5000/chamados/${id}/interacoes`, {
+                mensagem: novoComentario,
+                usuario_nome: usuarioLogado.nome
+            });
+            
+            setNovoComentario(""); // Limpa o campo
+            buscarComentarios(); // Recarrega apenas a lista de comentários
+        } catch (err) {
+            alert("Erro ao enviar comentário");
+        }
+    };
+
     if (!chamado) {
-        return <Box sx={{ p: 4 }}><Typography>Carregando...</Typography></Box>;
+        return <Typography sx={{ p: 5 }}>Carregando detalhes do chamado...</Typography>;
     }
 
     return (
         <Box sx={{ backgroundColor: "#eef2f6", minHeight: "100vh", py: 6 }}>
-        <Container maxWidth="lg">
-            <Paper sx={{ borderRadius: 8, p: 4, boxShadow: '0px 10px 30px rgba(0,0,0,0.05)' }}>
-                {/* Cabeçalho com ID e Status Dinâmico */}
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-                    <Typography variant="h4" fontWeight="800" color="#1e293b">
-                        Chamado #{chamado.id}
-                    </Typography>
-                    <Chip 
-                        label={chamado.status_nome} 
-                        sx={{ 
-                            backgroundColor: chamado.status_cor || "#1976d2", 
-                            color: "#fff", 
-                            fontWeight: "bold",
-                            fontSize: "1rem" 
-                        }} 
-                    />
-                </Stack>
+            <Container maxWidth="lg">
+                <Paper elevation={0} sx={{ borderRadius: 8, p: 4, bgcolor: '#fff', boxShadow: '0px 10px 30px rgba(0,0,0,0.05)' }}>
 
-                <Divider sx={{ mb: 3 }} />
+                    {/* CABEÇALHO DINÂMICO */}
+                    <Box sx={{ mb: 4 }}>
+                        <Typography variant="h4" fontWeight="800" color="#1e293b" gutterBottom>
+                            Chamado #{chamado.id}
+                        </Typography>
+                        <Stack direction="row" spacing={1}>
+                            <Chip 
+                                label={`Status: ${chamado.status_nome}`} 
+                                sx={{ bgcolor: chamado.status_cor || '#10b981', color: '#fff', fontWeight: 'bold' }} 
+                            />
+                            <Chip 
+                                label={`Impacto: ${chamado.impacto}`} 
+                                sx={{ bgcolor: '#1e293b', color: '#fff', fontWeight: 'bold' }} 
+                            />
+                        </Stack>
+                    </Box>
 
-                {/* Título do Chamado */}
-                <Typography variant="h5" fontWeight="700" color="#334155" gutterBottom>
-                    {chamado.titulo}
-                </Typography>
+                    <Grid container spacing={4}>
+                        <Grid item xs={12} md={7}>
+                            <Box sx={{
+                                bgcolor: '#dfeaf5',
+                                p: 4,
+                                borderRadius: 6,
+                                height: '100%',
+                                display: 'flex',
+                                flexDirection: 'column'
+                            }}>
+                                <Typography variant="h5" fontWeight="700" color="#1e293b" sx={{ mb: 2 }}>
+                                    {chamado.titulo}
+                                </Typography>
+                                <Typography variant="subtitle1" fontWeight="bold" color="#64748b" sx={{ mb: 1 }}>
+                                    Descrição Detalhada
+                                </Typography>
+                                <Typography variant="body1" color="#334155" sx={{ whiteSpace: 'pre-line' }}>
+                                    {chamado.descricao}
+                                </Typography>
+                            </Box>
+                        </Grid>
 
-                {/* Descrição em um Paper cinza para destacar */}
-                <Box sx={{ bgcolor: "#f8fafc", p: 3, borderRadius: 4, mt: 2 }}>
-                    <Typography variant="subtitle2" color="#64748b" sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <DescriptionIcon fontSize="small" /> Descrição:
-                    </Typography>
-                    <Typography variant="body1" color="#1e293b" sx={{ lineHeight: 1.8 }}>
-                        {chamado.descricao || "Nenhuma descrição fornecida."}
-                    </Typography>
-                </Box>
-            </Paper>
-        </Container>
-    </Box>
+                        <Grid item xs={12} md={5}>
+                            <Stack spacing={3}>
+                                <Box>
+                                    <Typography variant="h6" fontWeight="bold" color="#1e293b">
+                                        Informações de Solicitante
+                                    </Typography>
+                                    <Typography variant="body2" color="#64748b" sx={{ mt: 1, lineHeight: 2 }}>
+                                        <b>Nome:</b> {chamado.solicitante_nome} <br />
+                                        <b>Cargo:</b> {chamado.solicitante_cargo} <br />
+                                        <b>Setor:</b> {chamado.solicitante_setor} <br />
+                                        <b>Unidade:</b> {chamado.solicitante_unidade} <br />
+                                        <b>Ramal:</b> {chamado.solicitante_ramal || "N/A"}
+                                    </Typography>
+                                </Box>
+                                <Divider />
+                                <Box>
+                                    <Typography variant="h6" fontWeight="bold" color="#1e293b">
+                                        Classificação
+                                    </Typography>
+                                    <Typography variant="body2" color="#64748b" sx={{ mt: 1 }}>
+                                        <b>Tipo:</b> {chamado.tipo} <br />
+                                        <b>Categoria:</b> {chamado.categoria_nome || "Geral"}
+                                    </Typography>
+                                </Box>
+                            </Stack>
+                        </Grid>
+                    </Grid>
+
+                    <Box sx={{ mt: 6 }}>
+                        <Typography variant="h6" fontWeight="bold" color="#1e293b" sx={{ mb: 3 }}>
+                            Histórico de Atividades
+                        </Typography>
+
+                        <Stack spacing={3} sx={{ mb: 4, maxHeight: '400px', overflowY: 'auto', pr: 2 }}>
+                            {/* Abertura do Chamado */}
+                            <Box sx={{ display: 'flex', gap: 2, pl: 1, borderLeft: '2px solid #e2e8f0' }}>
+                                <Typography variant="caption" sx={{ color: '#64748b', minWidth: '130px' }}>
+                                    {new Date(chamado.data_criacao).toLocaleString('pt-BR')}
+                                </Typography>
+                                <Typography variant="body2" color="#334155">
+                                    🚀 <b>{chamado.solicitante_nome}</b> abriu o chamado.
+                                </Typography>
+                            </Box>
+
+                            {/* Comentários Dinâmicos */}
+                            {comentarios.map((item) => (
+                                <Box key={item.id} sx={{ display: 'flex', gap: 2, pl: 1, borderLeft: '2px solid #0085db' }}>
+                                    <Typography variant="caption" sx={{ color: '#64748b', minWidth: '130px' }}>
+                                        {new Date(item.data_interacao).toLocaleString('pt-BR')}
+                                    </Typography>
+                                    <Box sx={{ flex: 1 }}>
+                                        <Typography variant="body2" fontWeight="bold" color="#1e293b">
+                                            {item.usuario_nome}
+                                        </Typography>
+                                        <Typography variant="body2" color="#334155" sx={{ mt: 0.5, bgcolor: '#f8fafc', p: 1.5, borderRadius: 2, border: '1px solid #f1f5f9' }}>
+                                            {item.mensagem}
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            ))}
+                        </Stack>
+
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start', mt: 4 }}>
+                            <TextField
+                                fullWidth
+                                multiline
+                                rows={2}
+                                placeholder="Digite sua atualização ou resposta..."
+                                value={novoComentario}
+                                onChange={(e) => setNovoComentario(e.target.value)}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#fdfdfd' } }}
+                            />
+                            <Button
+                                variant="contained"
+                                disabled={!novoComentario.trim()}
+                                onClick={handleEnviarComentario}
+                                sx={{ bgcolor: '#0085db', px: 4, borderRadius: 2, height: '56px', fontWeight: 'bold' }}
+                            >
+                                Enviar
+                            </Button>
+                        </Box>
+                    </Box>
+                </Paper>
+            </Container>
+        </Box>
     );
 }

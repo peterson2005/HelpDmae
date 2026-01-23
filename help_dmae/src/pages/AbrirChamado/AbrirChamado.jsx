@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import {
   Stack, Grid, Paper, Typography, Box, TextField,
@@ -15,12 +15,13 @@ export default function AbrirChamado() {
   const navigate = useNavigate();
 
   const [userFields, setUserFields] = useState([
-    { id: 'nome', label: "Nome", value: "João Silva", isEditing: false },
-    { id: 'cargo', label: "Cargo", value: "Analista de Sistemas", isEditing: false },
-    { id: 'setor', label: "Setor", value: "TI", isEditing: false },
-    { id: 'unidade', label: "Unidade", value: "Matriz", isEditing: false },
-    { id: 'ramal', label: "Ramal", value: "1234", isEditing: false },
+    { id: 'nome', label: "Nome", value: "", isEditing: false },
+  { id: 'cargo', label: "Cargo", value: "", isEditing: false },
+  { id: 'setor', label: "Setor", value: "", isEditing: false },
+  { id: 'unidade', label: "Unidade", value: "", isEditing: false },
+  { id: 'ramal', label: "Ramal", value: "", isEditing: false },
   ]);
+  
 
   // Função para alternar entre texto e input
   const handleEditToggle = (id) => {
@@ -37,25 +38,64 @@ export default function AbrirChamado() {
   };
 
   const [formData, setFormData] = useState({
-    titulo: '',
-    descricao: '',
-    tipo: 'Incidente',
-    impacto: 'Individual',
-    categoria_id: 1, // Ex: Hardware
-    usuario_id: 1    // ID do João Silva que criamos
-  });
+  titulo: '',
+  descricao: '',
+  tipo: 'Incidente',
+  impacto: 'Individual',
+  categoria_id: 1,
+  usuario_id: null // Começa nulo porque ainda não sabemos quem logou
+});
+
+  useEffect(() => {
+  // 1. Pega a string do crachá
+  const usuarioGuardado = localStorage.getItem("usuarioLogado");
+
+  if (usuarioGuardado) {
+    // 2. Transforma em objeto JS
+    const user = JSON.parse(usuarioGuardado);
+
+    // 3. Atualiza os campos visuais da esquerda
+    setUserFields([
+      { id: 'nome', label: "Nome", value: user.nome || "", isEditing: false },
+      { id: 'cargo', label: "Cargo", value: user.cargo || "", isEditing: false },
+      { id: 'setor', label: "Setor", value: user.setor || "", isEditing: false },
+      { id: 'unidade', label: "Unidade", value: user.unidade || "", isEditing: false },
+      { id: 'ramal', label: "Ramal", value: user.ramal || "", isEditing: false },
+    ]);
+
+    // 4. Salva o ID do usuário no formulário para o banco saber de quem é o chamado
+    setFormData(prev => ({ ...prev, usuario_id: user.id }));
+    
+  } else {
+    // Se alguém tentar entrar sem logar, expulsa para o login
+    navigate("/login");
+  }
+}, [navigate]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('http://localhost:5000/chamados', formData);
-      alert("Chamado aberto com sucesso!");
-      navigate('/meus-chamados');
-    } catch (error) {
-      console.error("Erro ao enviar:", error);
-      alert("Erro ao abrir chamado.");
-    }
+  e.preventDefault();
+
+  // Criamos um objeto unificado com os dados do formulário + dados do solicitante
+  const dadosCompletos = {
+    ...formData,
+    // Buscamos os valores atuais dentro do array userFields
+    solicitante_nome: userFields.find(f => f.id === 'nome').value,
+    solicitante_cargo: userFields.find(f => f.id === 'cargo').value,
+    solicitante_setor: userFields.find(f => f.id === 'setor').value,
+    solicitante_unidade: userFields.find(f => f.id === 'unidade').value,
+    solicitante_ramal: userFields.find(f => f.id === 'ramal').value,
   };
+
+  try {
+    // Enviamos 'dadosCompletos' em vez de apenas 'formData'
+    await axios.post('http://localhost:5000/chamados', dadosCompletos);
+    alert("Chamado aberto com sucesso!");
+    navigate('/meus-chamados');
+  } catch (error) {
+    console.error("Erro ao enviar:", error);
+    alert("Erro ao abrir chamado.");
+  }
+};
 
 
   const [arquivos, setArquivos] = useState([]);

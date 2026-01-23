@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 import Login from "../pages/Login/Login";
 import EsqueciSenha from "../pages/EsqueciSenha/EsqueciSenha";
@@ -22,17 +23,19 @@ export default function AppRoutes() {
             <Route path="/inscrever" element={<Inscrever />} />
 
             {/* Área logada com layout fixo */}
-            <Route path="/" element={<Layout />}>
-
-                {/* Rotas para acessar */}
+            <Route
+                path="/"
+                element={
+                    <ProtectedRoute>
+                        <Layout />
+                    </ProtectedRoute>
+                }
+            >
+                {/* Todas as rotas abaixo herdam a proteção automaticamente */}
                 <Route path="home" element={<Home />} />
-
                 <Route path="meus-chamados" element={<MeusChamados />} />
-
                 <Route path="abrir-chamado" element={<AbrirChamado />} />
-
                 <Route path="configuracao" element={<Configuracao />} />
-
                 <Route path="/detalhes/:id" element={<Detalhes />} />
             </Route>
 
