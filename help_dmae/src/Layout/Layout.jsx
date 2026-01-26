@@ -6,7 +6,7 @@ import {
     ListItemButton, ListItemText, Menu,
     MenuItem,
     ListItemIcon
-    
+
 } from "@mui/material";
 
 // Ícones
@@ -18,6 +18,11 @@ import Logout from '@mui/icons-material/Logout';
 export default function Layout() {
     // 1. Estado para controlar se o menu está aberto
     const [open, setOpen] = useState(true);
+
+    const dadosUsuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+    const nomeCompleto = dadosUsuario?.nome || "Usuário";
+    const primeiroNome = nomeCompleto.split(" ")[0];
+    const inicial = primeiroNome.charAt(0).toUpperCase();
 
     const toggleDrawer = () => {
         setOpen(!open);
@@ -38,24 +43,24 @@ export default function Layout() {
     };
 
     // Estado para guardar em qual elemento o menu deve se "pendurar"
-const [anchorEl, setAnchorEl] = useState(null);
-const openMenu = Boolean(anchorEl); // Se o anchorEl não for nulo, o menu abre
+    const [anchorEl, setAnchorEl] = useState(null);
+    const openMenu = Boolean(anchorEl); // Se o anchorEl não for nulo, o menu abre
 
-// Função para abrir: pega o elemento que foi clicado (o avatar)
-const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-};
+    // Função para abrir: pega o elemento que foi clicado (o avatar)
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
 
-// Função para fechar
-const handleClose = () => {
-    setAnchorEl(null);
-};
+    // Função para fechar
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
 
-// Função de Sair (Logout)
-const handleLogout = () => {
-    localStorage.removeItem("usuarioLogado"); // Remove o crachá
-    navigate("/login"); // Manda para o login
-};
+    // Função de Sair (Logout)
+    const handleLogout = () => {
+        localStorage.removeItem("usuarioLogado"); // Remove o crachá
+        navigate("/login"); // Manda para o login
+    };
 
     return (
         <Box sx={{ display: "flex", gap: 2, minHeight: "100vh" }}>
@@ -95,12 +100,16 @@ const handleLogout = () => {
                             <ListItemText primary="Home" />
                         </ListItemButton>
                         <Divider component="li" />
+                        <ListItemButton onClick={() => navigate("/chamados")}>
+                            <ListItemText primary="Chamados" />
+                        </ListItemButton>
+                        <Divider component="li" />
                         <ListItemButton onClick={() => navigate("/abrir-chamado")}>
                             <ListItemText primary="Abrir Chamado" />
                         </ListItemButton>
                         <Divider component="li" />
-                        <ListItemButton onClick={() => navigate("/meus-chamados")}>
-                            <ListItemText primary="Meus Chamados" />
+                        <ListItemButton onClick={() => navigate("/usuarios")}>
+                            <ListItemText primary="Usuários" />
                         </ListItemButton>
                         <Divider component="li" />
                         <ListItemButton onClick={() => navigate("/configuracao")}>
@@ -155,20 +164,20 @@ const handleLogout = () => {
                         <Divider orientation="vertical" flexItem sx={{ mx: 1, height: 24, alignSelf: "center" }} />
 
                         <Typography variant="body2" sx={{ mr: 1, fontWeight: 500, color: "text.secondary" }}>
-                            Olá, João!
+                            Olá, {primeiroNome}!
                         </Typography>
-                        <IconButton 
-    onClick={handleClick} // Quando clica, abre o menu
-    size="small" 
-    sx={{ ml: 1 }}
-    aria-controls={openMenu ? 'account-menu' : undefined}
-    aria-haspopup="true"
-    aria-expanded={openMenu ? 'true' : undefined}
->
-    <Avatar sx={{ width: 32, height: 32, bgcolor: "#007bff", fontSize: "0.85rem" }}>
-        J
-    </Avatar>
-</IconButton>
+                        <IconButton
+                            onClick={handleClick} // Quando clica, abre o menu
+                            size="small"
+                            sx={{ ml: 1 }}
+                            aria-controls={openMenu ? 'account-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={openMenu ? 'true' : undefined}
+                        >
+                            <Avatar sx={{ width: 32, height: 32, bgcolor: "#007bff", fontSize: "0.85rem" }}>
+                                {inicial}
+                            </Avatar>
+                        </IconButton>
                     </Box>
                 </Paper>
 
@@ -176,46 +185,46 @@ const handleLogout = () => {
                 <Outlet />
             </Stack>
             <Menu
-    anchorEl={anchorEl}
-    id="account-menu"
-    open={openMenu}
-    onClose={handleClose}
-    onClick={handleClose} // Fecha quando clicar em qualquer opção
-    transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-    anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-    PaperProps={{
-        elevation: 3,
-        sx: {
-            overflow: 'visible',
-            filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-            mt: 1.5,
-            '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1 },
-            '&::before': { // Aquela setinha que aponta para cima
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: 0,
-                right: 14,
-                width: 10,
-                height: 10,
-                bgcolor: 'background.paper',
-                transform: 'translateY(-50%) rotate(45deg)',
-                zIndex: 0,
-            },
-        },
-    }}
->
-    <MenuItem onClick={() => navigate("/configuracao")}>
-        Meu Perfil
-    </MenuItem>
-    <Divider />
-    <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-        <ListItemIcon>
-            <Logout fontSize="small" color="error" />
-        </ListItemIcon>
-        Sair
-    </MenuItem>
-</Menu>
+                anchorEl={anchorEl}
+                id="account-menu"
+                open={openMenu}
+                onClose={handleClose}
+                onClick={handleClose} // Fecha quando clicar em qualquer opção
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                PaperProps={{
+                    elevation: 3,
+                    sx: {
+                        overflow: 'visible',
+                        filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                        mt: 1.5,
+                        '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1 },
+                        '&::before': { // Aquela setinha que aponta para cima
+                            content: '""',
+                            display: 'block',
+                            position: 'absolute',
+                            top: 0,
+                            right: 14,
+                            width: 10,
+                            height: 10,
+                            bgcolor: 'background.paper',
+                            transform: 'translateY(-50%) rotate(45deg)',
+                            zIndex: 0,
+                        },
+                    },
+                }}
+            >
+                <MenuItem onClick={() => navigate("/configuracao")}>
+                    Meu Perfil
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                    <ListItemIcon>
+                        <Logout fontSize="small" color="error" />
+                    </ListItemIcon>
+                    Sair
+                </MenuItem>
+            </Menu>
         </Box>
     );
 }

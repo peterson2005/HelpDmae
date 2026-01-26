@@ -40,8 +40,8 @@ export default function AbrirChamado() {
   const [formData, setFormData] = useState({
   titulo: '',
   descricao: '',
-  tipo: 'Incidente',
-  impacto: 'Individual',
+  tipo: 'incidente',
+  impacto: 'eu',
   categoria_id: 1,
   usuario_id: null // Começa nulo porque ainda não sabemos quem logou
 });
@@ -90,7 +90,7 @@ export default function AbrirChamado() {
     // Enviamos 'dadosCompletos' em vez de apenas 'formData'
     await axios.post('http://localhost:5000/chamados', dadosCompletos);
     alert("Chamado aberto com sucesso!");
-    navigate('/meus-chamados');
+    navigate('/chamados');
   } catch (error) {
     console.error("Erro ao enviar:", error);
     alert("Erro ao abrir chamado.");
@@ -134,7 +134,7 @@ export default function AbrirChamado() {
         <Grid container spacing={6} justifyContent="center">
 
           {/* COLUNA ESQUERDA: Agora com md={6} para ficar equilibrado */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               Informações do Solicitante
             </Typography>
@@ -207,7 +207,7 @@ export default function AbrirChamado() {
           </Grid>
 
           {/* COLUNA DIREITA: */}
-          <Grid item xs={12} md={5}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Stack spacing={4}>
               <Box>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>Classificação e Impacto</Typography>

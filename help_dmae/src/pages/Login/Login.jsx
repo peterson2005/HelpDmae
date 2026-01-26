@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -16,51 +17,27 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 export default function Login() {
-  const [matricula, setMatricula] = useState("");  // armazena o valor do email
-  const [senha, setSenha] = useState("");  // armazena o valor da senha
-  const [showSenha, setShowSenha] = useState(false); // Para esconder e mostrar a senha
+  const [matricula, setMatricula] = useState("");
+  const [senha, setSenha] = useState("");
+  const [showSenha, setShowSenha] = useState(false);
+  const navigate = useNavigate();
 
-
-  const navigate = useNavigate();  // rotas navegacao
-
-
-  async function handleSubmit(e) {
-    e.preventDefault(); // Passo 1: Impede que a página recarregue
-
-    // Passo 2: Criar o objeto com o que foi digitado
-    const dadosLogin = {
-  matricula: matricula, // agora usa o nome correto
-  senha: senha
-};
-
-    console.log("Tentando logar com:", dadosLogin);
+  // Função disparada ao clicar no botão ou dar Enter
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     try {
-      const resposta = await fetch("http://localhost:5000/login", {
-        method: "POST", // Tipo de envio
-        headers: {
-          "Content-Type": "application/json", // Avisa que estamos enviando JSON
-        },
-        body: JSON.stringify(dadosLogin), // Transforma o objeto em texto para a rede
-      });
+      const response = await axios.post('http://localhost:5000/login', { matricula, senha });
+      const { user } = response.data;
 
-      const resultado = await resposta.json(); // Espera a resposta do Node
-
-      if (resposta.ok) {
-        console.log("Sucesso!", resultado);
-
-        // PASSO A: Salvar os dados do usuário no "pendrive" do navegador
-        // resultado.user contém (nome, cargo, setor, ramal, id) que seu node enviou
-        localStorage.setItem("usuarioLogado", JSON.stringify(resultado.user));
-
-        // PASSO B: Navegar para a tela principal
-        navigate("/");
-      }
-    } catch (erro) {
-      console.error("Erro ao conectar com a API:", erro);
+      // 1. Salva os dados no localStorage
+      localStorage.setItem("usuarioLogado", JSON.stringify(user));
+      navigate('/chamados');
+    } catch (error) {
+      // Pega a mensagem de erro vinda do seu Node.js
+      alert(error.response?.data?.error || "Erro ao conectar com o servidor");
     }
-  }
-
+  };
 
 
   return (
@@ -112,17 +89,17 @@ export default function Login() {
 
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
-  label="Matrícula"
-  fullWidth
-  margin="normal"
-  value={matricula}
-  onChange={(e) => setMatricula(e.target.value)}
-/>
+            label="Matrícula"
+            fullWidth
+            margin="normal"
+            value={matricula}
+            onChange={(e) => setMatricula(e.target.value)}
+          />
 
 
           <TextField
             label="senha"
-            type={showSenha ? "text" : "senha"}
+            type={showSenha ? "text" : "password"}
             fullWidth
             margin="normal"
             value={senha}

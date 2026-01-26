@@ -1,13 +1,20 @@
 import { Navigate } from "react-router-dom";
 
-export default function ProtectedRoute({ children }) {
-  const usuarioLogado = localStorage.getItem("usuarioLogado");
+// Adicionamos 'perfisPermitidos' como parâmetro
+export default function ProtectedRoute({ children, perfisPermitidos }) {
+  const usuarioJson = localStorage.getItem("usuarioLogado");
 
-  if (!usuarioLogado) {
-    // Se não houver nada no localStorage, manda para o login
+  if (!usuarioJson) {
     return <Navigate to="/login" replace />;
   }
 
-  // Se estiver logado, permite ver a tela (children)
+  const usuario = JSON.parse(usuarioJson);
+
+  // Se a rota for restrita a certos perfis e o usuário não tiver esse perfil
+  if (perfisPermitidos && !perfisPermitidos.includes(usuario.perfil_id)) {
+    // Redireciona para a Home dele caso ele tente acessar algo proibido
+    return <Navigate to={usuario.perfil_id === 1 ? "/Home" : "/fila-chamados"} replace />;
+  }
+
   return children;
 }
