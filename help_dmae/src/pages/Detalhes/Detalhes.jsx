@@ -1,21 +1,22 @@
-import React, { useState, useEffect, useCallback } from 'react'; // Adicionei useCallback
+import React, { useState, useEffect, useCallback } from 'react'; 
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
     Box, Grid, Paper, Typography, Chip, Divider,
-    Stack, Button, TextField, Container
+    Stack, Button, TextField, Container, IconButton, Tooltip
 } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 export default function DetalhesChamado() {
     const navigate = useNavigate();
     const { id } = useParams();
-    
+
     const [chamado, setChamado] = useState(null);
     const [comentarios, setComentarios] = useState([]);
     const [novoComentario, setNovoComentario] = useState("");
-
-    // 1. Função para buscar o chamado
+    const [tecnicos, setTecnicos] = useState([]); 
+    const [tecnicoAtribuido, setTecnicoAtribuido] = useState(""); 
     const buscarDadosChamado = useCallback(async () => {
         try {
             const resposta = await axios.get(`http://localhost:5000/chamados/${id}`);
@@ -25,7 +26,6 @@ export default function DetalhesChamado() {
         }
     }, [id]);
 
-    // 2. Função para buscar os comentários
     const buscarComentarios = useCallback(async () => {
         try {
             const res = await axios.get(`http://localhost:5000/chamados/${id}/interacoes`);
@@ -35,14 +35,47 @@ export default function DetalhesChamado() {
         }
     }, [id]);
 
-    // 3. useEffect Único (Roda uma vez quando entra na tela)
     useEffect(() => {
+
         if (id) {
             buscarDadosChamado();
             buscarComentarios();
         }
     }, [id, buscarDadosChamado, buscarComentarios]);
 
+    const buscarTecnicos = useCallback(async () => {
+        try {
+            const res = await axios.get('http://localhost:5000/usuarios/tecnicos');
+            setTecnicos(res.data);
+        } catch (err) {
+            console.error("Erro ao buscar técnicos", err);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (id) {
+            buscarDadosChamado();
+            buscarComentarios();
+            buscarTecnicos();
+        }
+    }, [id, buscarDadosChamado, buscarComentarios, buscarTecnicos]);
+    const handleAtribuirChamado = async (tecnicoId) => {
+        if (!tecnicoId) return;
+
+        try {
+            await axios.put(`http://localhost:5000/chamados/${id}/atribuir`, {
+                tecnico_id: tecnicoId,
+                status_id: 2 
+            });
+
+            alert("Chamado atribuído e status atualizado!");
+            buscarDadosChamado();
+            buscarComentarios();
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao atribuir chamado.");
+        }
+    };
     const handleEnviarComentario = async () => {
         if (!novoComentario.trim()) return;
 
@@ -53,15 +86,15 @@ export default function DetalhesChamado() {
         }
 
         const usuarioLogado = JSON.parse(usuarioGuardado);
-        
+
         try {
             await axios.post(`http://localhost:5000/chamados/${id}/interacoes`, {
                 mensagem: novoComentario,
                 usuario_nome: usuarioLogado.nome
             });
-            
-            setNovoComentario(""); // Limpa o campo
-            buscarComentarios(); // Recarrega apenas a lista de comentários
+
+            setNovoComentario(""); 
+            buscarComentarios(); 
         } catch (err) {
             alert("Erro ao enviar comentário");
         }
@@ -70,6 +103,7 @@ export default function DetalhesChamado() {
     if (!chamado) {
         return <Typography sx={{ p: 5 }}>Carregando detalhes do chamado...</Typography>;
     }
+
 
     return (
         <Box sx={{ backgroundColor: "#eef2f6", minHeight: "100vh", py: 6 }}>
@@ -81,15 +115,41 @@ export default function DetalhesChamado() {
                         <Typography variant="h4" fontWeight="800" color="#1e293b" gutterBottom>
                             Chamado #{chamado.id}
                         </Typography>
-                        <Stack direction="row" spacing={1}>
-                            <Chip 
-                                label={`Status: ${chamado.status_nome}`} 
-                                sx={{ bgcolor: chamado.status_cor || '#10b981', color: '#fff', fontWeight: 'bold' }} 
+                        <Stack direction="row" spacing={2} alignItems="center">
+                            <Chip
+                                label={chamado.status_nome}
+                                sx={{ bgcolor: chamado.status_cor || '#10b981', color: '#fff', fontWeight: 'bold' }}
                             />
-                            <Chip 
-                                label={`Impacto: ${chamado.impacto}`} 
-                                sx={{ bgcolor: '#1e293b', color: '#fff', fontWeight: 'bold' }} 
+                            <Chip
+                                label={`Impacto: ${chamado.impacto}`}
+                                sx={{ border: '1px solid #1e293b', color: '#1e293b', fontWeight: 'bold' }}
                             />
+
+                            <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+
+                            <TextField
+                                select
+                                size="small"
+                                label="Atribuir Técnico"
+                                value={chamado.tecnico_id || ""}
+                                onChange={(e) => handleAtribuirChamado(e.target.value)}
+                                SelectProps={{ native: true }}
+                                sx={{
+                                    minWidth: 220,
+                                    '& .MuiOutlinedInput-root': {
+                                        borderRadius: 3,
+                                        bgcolor: '#f8fafc',
+                                        '& fieldset': { borderColor: '#e2e8f0' }
+                                    }
+                                }}
+                            >
+                                <option value="" disabled>Selecione um técnico...</option>
+                                {tecnicos.map((t) => (
+                                    <option key={t.id} value={t.id}>
+                                        {t.nome}
+                                    </option>
+                                ))}
+                            </TextField>
                         </Stack>
                     </Box>
 
@@ -155,7 +215,7 @@ export default function DetalhesChamado() {
                                     {new Date(chamado.data_criacao).toLocaleString('pt-BR')}
                                 </Typography>
                                 <Typography variant="body2" color="#334155">
-                                    🚀 <b>{chamado.solicitante_nome}</b> abriu o chamado.
+                                     <b>{chamado.solicitante_nome}</b> abriu o chamado.
                                 </Typography>
                             </Box>
 

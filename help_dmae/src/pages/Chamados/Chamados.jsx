@@ -49,6 +49,18 @@ export default function Chamados() {
   useEffect(() => {
     carregarChamados();
   }, []);
+
+  const [termoBusca, setTermoBusca] = useState("");
+  const [statusFiltro, setStatusFiltro] = useState("Todos");
+  const chamadosFiltrados = chamados.filter((chamado) => {
+    const matchesBusca = chamado.titulo.toLowerCase().includes(termoBusca.toLowerCase()) ||
+      chamado.id.toString().includes(termoBusca) ||
+      (chamado.solicitante_nome?.toLowerCase().includes(termoBusca.toLowerCase()));
+
+    const matchesStatus = statusFiltro === "Todos" || chamado.status === statusFiltro;
+
+    return matchesBusca && matchesStatus;
+  });
   return (
     <Box sx={{ p: 4, bgcolor: "#f4f6f8", minHeight: "100vh" }}>
       {/* Título da Página */}
@@ -60,13 +72,27 @@ export default function Chamados() {
       <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
         <Chip
           label={`Todos (${chamados.length})`}
-          color="primary"
-          sx={{ fontWeight: 'bold' }}
+          color={statusFiltro === "Todos" ? "primary" : "default"}
+          onClick={() => setStatusFiltro("Todos")}
         />
-        <Chip label="Abertos (10)" variant="outlined" onClick={() => { }} />
-        <Chip label="Em Atendimento (5)" variant="outlined" onClick={() => { }} />
-        <Chip label="Concluídos (0)" variant="outlined" onClick={() => { }} />
-        <Chip label="Cancelados (0)" variant="outlined" onClick={() => { }} />
+        <Chip
+          label={`Abertos (${chamados.filter(c => c.status === "Aberto").length})`}
+          variant={statusFiltro === "Aberto" ? "filled" : "outlined"}
+          color="primary"
+          onClick={() => setStatusFiltro("Aberto")}
+        />
+        <Chip
+          label={`Em Atendimento (${chamados.filter(c => c.status === "Em Atendimento").length})`}
+          variant={statusFiltro === "Em Atendimento" ? "filled" : "outlined"}
+          color="primary"
+          onClick={() => setStatusFiltro("Em Atendimento")}
+        />
+        <Chip
+          label={`Concluídos (${chamados.filter(c => c.status === "Concluído").length})`}
+          variant={statusFiltro === "Concluído" ? "filled" : "outlined"}
+          color="primary"
+          onClick={() => setStatusFiltro("Concluído")}
+        />
       </Stack>
 
       <Paper elevation={0} sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
@@ -75,7 +101,9 @@ export default function Chamados() {
         <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', bgcolor: "#fff" }}>
           <TextField
             size="small"
-            placeholder="Pesquisar chamado..."
+            placeholder="Pesquisar por ID, título ou nome..."
+            value={termoBusca}
+            onChange={(e) => setTermoBusca(e.target.value)}
             sx={{ width: 300 }}
             InputProps={{
               startAdornment: (
@@ -120,7 +148,7 @@ export default function Chamados() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {chamados.map((chamado) => (
+              {chamadosFiltrados.map((chamado) => (
                 <TableRow
                   key={chamado.id}
                   onClick={() => navigate(`/detalhes/${chamado.id}`)}

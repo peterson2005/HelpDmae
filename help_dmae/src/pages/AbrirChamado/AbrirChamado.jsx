@@ -75,10 +75,22 @@ export default function AbrirChamado() {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Criamos um objeto unificado com os dados do formulário + dados do solicitante
+  // 1. Validação: Impedir campos vazios
+  if (!formData.titulo.trim() || !formData.descricao.trim()) {
+    alert("Por favor, preencha o título e a descrição do problema.");
+    return; // Interrompe a função aqui
+  }
+
+  // 2. Validação: Garantir que o ID do usuário existe
+  if (!formData.usuario_id) {
+    alert("Erro de autenticação. Por favor, faça login novamente.");
+    navigate("/login");
+    return;
+  }
+
+  // Criamos o objeto unificado
   const dadosCompletos = {
     ...formData,
-    // Buscamos os valores atuais dentro do array userFields
     solicitante_nome: userFields.find(f => f.id === 'nome').value,
     solicitante_cargo: userFields.find(f => f.id === 'cargo').value,
     solicitante_setor: userFields.find(f => f.id === 'setor').value,
@@ -87,27 +99,26 @@ export default function AbrirChamado() {
   };
 
   try {
-    // Enviamos 'dadosCompletos' em vez de apenas 'formData'
     await axios.post('http://localhost:5000/chamados', dadosCompletos);
     alert("Chamado aberto com sucesso!");
     navigate('/chamados');
   } catch (error) {
     console.error("Erro ao enviar:", error);
-    alert("Erro ao abrir chamado.");
+    alert("Erro ao abrir chamado. Verifique a conexão com o servidor.");
   }
 };
 
 
   const [arquivos, setArquivos] = useState([]);
-  const fileInputRef = useRef(null); // Referência para o input escondido
+  const fileInputRef = useRef(null); 
 
   const handleFileClick = () => {
-    fileInputRef.current.click(); // Quando clicar no Box, ele "clica" no input real
+    fileInputRef.current.click();
   };
 
   const handleFileChange = (e) => {
     const novosArquivos = Array.from(e.target.files);
-    setArquivos((prev) => [...prev, ...novosArquivos]); // Adiciona à lista
+    setArquivos((prev) => [...prev, ...novosArquivos]); 
   };
 
   return (
@@ -116,8 +127,8 @@ export default function AbrirChamado() {
       backgroundColor: "#f4f6f8",
       minHeight: "100vh",
       display: "flex",
-      justifyContent: "center", // Centraliza horizontalmente
-      alignItems: "flex-start"   // Começa pelo topo mas centralizado
+      justifyContent: "center", 
+      alignItems: "flex-start"   
     }}>
       {/* Aumentei o maxWidth para 1400px para ocupar mais a tela cheia */}
       <Paper elevation={3} sx={{ p: 5, borderRadius: 3, width: "100%", maxWidth: 1400 }}>
@@ -314,13 +325,15 @@ export default function AbrirChamado() {
             CANCELAR
           </Button>
           <Button
-            variant="contained"
-            size="large"
-            sx={{ px: 10, py: 1.5, fontWeight: 'bold', boxShadow: 4 }}
-            onClick={handleSubmit}
-          >
-            ENVIAR CHAMADO
-          </Button>
+  variant="contained"
+  size="large"
+  sx={{ px: 10, py: 1.5, fontWeight: 'bold', boxShadow: 4 }}
+  onClick={handleSubmit}
+  // Se o título ou descrição estiverem vazios, o botão trava
+  disabled={!formData.titulo.trim() || !formData.descricao.trim()}
+>
+  ABRIR CHAMADO
+</Button>
         </Box>
       </Paper>
     </Box>

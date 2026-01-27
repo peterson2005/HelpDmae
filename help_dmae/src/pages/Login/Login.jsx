@@ -12,6 +12,7 @@ import {
   IconButton,
   InputAdornment,
 } from "@mui/material";
+import imagemFundo from "../../img/fundo3.png";
 
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -42,16 +43,22 @@ export default function Login() {
 
   return (
     <Box
-      sx={{
-        minHeight: "100vh",
-        backgroundImage: "url(/src/assets/bg-login.jpg)",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+  sx={{
+    minHeight: "100vh",
+    width: "100vw", 
+    backgroundImage: "url(/src/img/fundo3.png)",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    margin: 0,     
+    padding: 0,   
+    overflow: "hidden", 
+    position: "relative",
+  }}
+>
       {/* Overlay escuro */}
       <Box
         sx={{

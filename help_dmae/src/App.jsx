@@ -5,12 +5,15 @@ import Routes from "./Routes/Routes"
 import Detalhes from './pages/Detalhes/Detalhes';
 
 
+
+
 function App() {
 
 
   return (
     <>
       <div>
+        
         <Routes />
       </div>
     </>
