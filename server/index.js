@@ -49,6 +49,23 @@ app.post('/login', async (req, res) => {
   }
 });
 
+
+  // --- ROTA DE ESTATÍSTICAS PARA O DASHBOARD ---
+app.get('/dashboard/stats', async (req, res) => {
+  try {
+    const stats = await pool.query(`
+      SELECT 
+        COUNT(*) as total,
+        COUNT(*) FILTER (WHERE status_id = 1) as abertos,
+        COUNT(*) FILTER (WHERE status_id = 3) as finalizados
+      FROM chamados
+    `);
+    res.json(stats.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // --- ROTA DE LISTAGEM  ---
 app.get('/chamados', async (req, res) => {
   try {
@@ -94,6 +111,52 @@ app.get('/chamados/:id', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// --- ROTA PARA LISTAR TODOS OS USUÁRIOS (Usada na Tabela) ---
+app.get('/usuarios', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, matricula, nome, cargo, ramal, setor, unidade, perfil_id FROM usuarios ORDER BY nome ASC'
+    );
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao buscar usuários: ' + err.message });
+  }
+});
+
+// --- ROTA PARA CADASTRAR NOVO USUÁRIO ---
+app.post('/usuarios', async (req, res) => {
+  try {
+    const { matricula, nome, senha, cargo, ramal, setor, unidade, perfil_id } = req.body;
+    
+    const querySQL = `
+      INSERT INTO usuarios (matricula, nome, senha, cargo, ramal, setor, unidade, perfil_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING id, nome
+    `;
+    
+    const valores = [matricula, nome, senha, cargo, ramal, setor, unidade, perfil_id];
+    const result = await pool.query(querySQL, valores);
+    
+    res.status(201).json({ message: 'Usuário criado com sucesso!', user: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao criar usuário: ' + err.message });
+  }
+});
+
+// --- ROTA PARA DELETAR USUÁRIO ---
+app.delete('/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM usuarios WHERE id = $1', [id]);
+    res.json({ message: 'Usuário removido com sucesso!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao excluir usuário' });
+  }
+});
+
+
+
 
 // --- ROTA DE CRIAÇÃO ---
 app.post('/chamados', async (req, res) => {

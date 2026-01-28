@@ -45,7 +45,7 @@ export default function Login() {
     <Box
   sx={{
     minHeight: "100vh",
-    width: "100vw", 
+    width: "100vw",
     backgroundImage: "url(/src/img/fundo3.png)",
     backgroundSize: "cover",
     backgroundPosition: "center",
@@ -53,9 +53,9 @@ export default function Login() {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    margin: 0,     
-    padding: 0,   
-    overflow: "hidden", 
+    margin: 0,
+    padding: 0,
+    overflow: "hidden",
     position: "relative",
   }}
 >

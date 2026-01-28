@@ -31,36 +31,25 @@ export default function AppRoutes() {
                     </ProtectedRoute>
                 }
             >
-                {/* 1. Rotas Comuns (Qualquer perfil logado acessa) */}
+                {/* 1. Rotas Comuns (Todos os perfis 1, 2 e 3) */}
                 <Route path="home" element={<Home />} />
                 <Route path="configuracao" element={<Configuracao />} />
                 <Route path="detalhes/:id" element={<Detalhes />} />
-
-                {/* 2. Rotas de Usuário Comum (Perfil 1) */}
-                <Route path="chamados" element={<Chamados />} />
                 <Route path="abrir-chamado" element={<AbrirChamado />} />
 
-                {/* 3. Rotas de Técnico/Admin (Perfil 2 e 3) */}
-                <Route
-                    path="chamados"
-                    element={
-                        <ProtectedRoute perfisPermitidos={[2, 3]}>
-                            {/* <FilaChamados /> */} <div>Tela de Fila</div>
-                        </ProtectedRoute>
-                    }
-                />
+                {/* 2. Rota de Chamados (Acesso Geral, mas o componente filtra internamente) */}
+                <Route path="chamados" element={<Chamados />} />
 
-                {/* 4. Rotas de Admin (Perfil 3) */}
+                {/* 3. Rotas restritas a Administradores (Perfil 3) */}
                 <Route
                     path="usuarios"
                     element={
                         <ProtectedRoute perfisPermitidos={[3]}>
-                            {/* <GestaoUsuarios /> */} <div>Tela de Usuários</div>
+                            <Usuarios />
                         </ProtectedRoute>
                     }
                 />
             </Route>
         </Routes>
-
     );
 }

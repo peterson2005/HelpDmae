@@ -6,23 +6,22 @@ import {
     ListItemButton, ListItemText, Menu,
     MenuItem,
     ListItemIcon
-
 } from "@mui/material";
-
-// Ícones
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import Logout from '@mui/icons-material/Logout';
 
 export default function Layout() {
-    // 1. Estado para controlar se o menu está aberto
     const [open, setOpen] = useState(true);
 
     const dadosUsuario = JSON.parse(localStorage.getItem("usuarioLogado"));
     const nomeCompleto = dadosUsuario?.nome || "Usuário";
     const primeiroNome = nomeCompleto.split(" ")[0];
     const inicial = primeiroNome.charAt(0).toUpperCase();
+
+    const isAdmin = String(dadosUsuario?.perfil_id) === "3";
+    
 
     const toggleDrawer = () => {
         setOpen(!open);
@@ -38,28 +37,22 @@ export default function Layout() {
         border: "1px solid",
         borderColor: "divider",
         backgroundColor: "background.paper",
-        // Esconde o menu se estiver fechado para evitar overflow visual
         display: open ? "block" : "none",
     };
-
-    // Estado para guardar em qual elemento o menu deve se "pendurar"
     const [anchorEl, setAnchorEl] = useState(null);
-    const openMenu = Boolean(anchorEl); // Se o anchorEl não for nulo, o menu abre
+    const openMenu = Boolean(anchorEl);
 
-    // Função para abrir: pega o elemento que foi clicado (o avatar)
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
 
-    // Função para fechar
     const handleClose = () => {
         setAnchorEl(null);
     };
 
-    // Função de Sair (Logout)
     const handleLogout = () => {
-        localStorage.removeItem("usuarioLogado"); // Remove o crachá
-        navigate("/login"); // Manda para o login
+        localStorage.removeItem("usuarioLogado");
+        navigate("/login");
     };
 
     return (
@@ -108,10 +101,14 @@ export default function Layout() {
                             <ListItemText primary="Abrir Chamado" />
                         </ListItemButton>
                         <Divider component="li" />
-                        <ListItemButton onClick={() => navigate("/usuarios")}>
-                            <ListItemText primary="Usuários" />
-                        </ListItemButton>
-                        <Divider component="li" />
+                        {isAdmin && (
+                            <>
+                                <ListItemButton onClick={() => navigate("/usuarios")}>
+                                    <ListItemText primary="Usuários" />
+                                </ListItemButton>
+                                <Divider component="li" />
+                            </>
+                        )}
                         <ListItemButton onClick={() => navigate("/configuracao")}>
                             <ListItemText primary="Configurações" />
                         </ListItemButton>
@@ -189,7 +186,7 @@ export default function Layout() {
                 id="account-menu"
                 open={openMenu}
                 onClose={handleClose}
-                onClick={handleClose} // Fecha quando clicar em qualquer opção
+                onClick={handleClose}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 PaperProps={{
@@ -199,7 +196,7 @@ export default function Layout() {
                         filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
                         mt: 1.5,
                         '& .MuiAvatar-root': { width: 32, height: 32, ml: -0.5, mr: 1 },
-                        '&::before': { // Aquela setinha que aponta para cima
+                        '&::before': {
                             content: '""',
                             display: 'block',
                             position: 'absolute',
