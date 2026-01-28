@@ -11,6 +11,8 @@ import Configuracao from "../pages/Configuracao/Configuracao";
 import Detalhes from "../pages/Detalhes/Detalhes";
 import Chamados from "../pages/Chamados/Chamados";
 import Usuarios from "../pages/Usuarios/Usuarios";
+import CreateUser from "../pages/Usuarios/CreateUser";
+import EditUser from "../pages/Usuarios/EditUser";
 
 export default function AppRoutes() {
     return (
@@ -49,6 +51,27 @@ export default function AppRoutes() {
                         </ProtectedRoute>
                     }
                 />
+
+                {/* ROTA PARA CRIAR USUÁRIO */}
+                <Route
+                    path="usuarios/novo"
+                    element={
+                        <ProtectedRoute perfisPermitidos={[3]}>
+                            <CreateUser />
+                        </ProtectedRoute>
+                    }
+                />
+
+                {/* ROTA PARA EDITAR USUÁRIO (com ID dinâmico) */}
+                <Route
+                    path="usuarios/editar/:id"
+                    element={
+                        <ProtectedRoute perfisPermitidos={[3]}>
+                            <EditUser />
+                        </ProtectedRoute>
+                    }
+                />
+
             </Route>
         </Routes>
     );

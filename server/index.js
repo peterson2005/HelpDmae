@@ -157,6 +157,24 @@ app.delete('/usuarios/:id', async (req, res) => {
 
 
 
+app.get('/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      'SELECT id, matricula, nome, cargo, ramal, setor, unidade, perfil_id FROM usuarios WHERE id = $1',
+      [id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // --- ROTA DE CRIAÇÃO ---
 app.post('/chamados', async (req, res) => {
@@ -199,6 +217,17 @@ app.get('/chamados/:id/interacoes', async (req, res) => {
   }
 });
 
+app.patch('/usuarios/:id/senha', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { senha } = req.body;
+    await pool.query('UPDATE usuarios SET senha = $1 WHERE id = $2', [senha, id]);
+    res.json({ message: "Senha atualizada!" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ROTA PARA INSERIR COMENTÁRIO (CORRIGIDA)
 app.post('/chamados/:id/interacoes', async (req, res) => {
   try {
@@ -217,4 +246,24 @@ app.post('/chamados/:id/interacoes', async (req, res) => {
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`✅ Servidor rodando na porta ${PORT}`);
+});
+
+app.put('/usuarios/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nome, cargo, ramal, setor, unidade, perfil_id } = req.body;
+
+    const querySQL = `
+      UPDATE usuarios 
+      SET nome = $1, cargo = $2, ramal = $3, setor = $4, unidade = $5, perfil_id = $6
+      WHERE id = $7
+    `;
+
+    const valores = [nome, cargo, ramal, setor, unidade, perfil_id, id];
+    await pool.query(querySQL, valores);
+
+    res.json({ message: 'Usuário atualizado com sucesso!' });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar usuário: ' + err.message });
+  }
 });
