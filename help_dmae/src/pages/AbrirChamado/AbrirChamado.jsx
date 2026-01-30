@@ -75,20 +75,23 @@ export default function AbrirChamado() {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // 1. Validação: Impedir campos vazios
+  // 1. Validações
   if (!formData.titulo.trim() || !formData.descricao.trim()) {
     alert("Por favor, preencha o título e a descrição do problema.");
-    return; // Interrompe a função aqui
+    return;
   }
 
-  // 2. Validação: Garantir que o ID do usuário existe
+  // 2. Recuperar dados originais do usuário logado para o registro do sistema
+  const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "{}");
+  const nomeUsuarioAutenticado = usuarioLogado.nome || "Usuário Desconhecido";
+
   if (!formData.usuario_id) {
     alert("Erro de autenticação. Por favor, faça login novamente.");
     navigate("/login");
     return;
   }
 
-  // Criamos o objeto unificado
+  // Dados para a criação do chamado (podem ter sido editados nos campos da esquerda)
   const dadosCompletos = {
     ...formData,
     solicitante_nome: userFields.find(f => f.id === 'nome').value,
@@ -99,12 +102,21 @@ export default function AbrirChamado() {
   };
 
   try {
-    await axios.post('http://localhost:5000/chamados', dadosCompletos);
-    alert("Chamado aberto com sucesso!");
+    // 1. Criar o chamado
+    const resposta = await axios.post('http://localhost:5000/chamados', dadosCompletos);
+    const novoId = resposta.data.id;
+
+    // 2. Registrar quem abriu usando o nome do USUÁRIO AUTENTICADO
+    await axios.post(`http://localhost:5000/chamados/${novoId}/interacoes`, {
+      mensagem: `SISTEMA: Chamado criado pelo usuário ${nomeUsuarioAutenticado}.`,
+      usuario_nome: "SISTEMA"
+    });
+
+    alert(`Chamado #${novoId} enviado com sucesso!`);
     navigate('/chamados');
   } catch (error) {
-    console.error("Erro ao enviar:", error);
-    alert("Erro ao abrir chamado. Verifique a conexão com o servidor.");
+    console.error("Erro ao abrir chamado:", error);
+    alert("Erro ao conectar com o servidor.");
   }
 };
 

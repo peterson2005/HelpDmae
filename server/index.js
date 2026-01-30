@@ -146,6 +146,50 @@ app.delete('/usuarios/:id', async (req, res) => {
   }
 });
 
+
+app.put('/usuarios/:id/perfil', async (req, res) => {
+    const { id } = req.params;
+    const { nome, cargo, setor, ramal, unidade } = req.body;
+
+    try {
+        const result = await pool.query(
+            `UPDATE usuarios 
+             SET nome = $1, cargo = $2, setor = $3, ramal = $4, unidade = $5 
+             WHERE id = $6 RETURNING id, nome, matricula, cargo, setor, ramal, unidade, perfil_id`,
+            [nome, cargo, setor, ramal, unidade, id]
+        );
+
+        res.json({ 
+            message: "Perfil atualizado!", 
+            usuario: result.rows[0] 
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Erro interno ao salvar" });
+    }
+});
+
+
+app.patch('/usuarios/:id/senha-config', async (req, res) => {
+  const { id } = req.params;
+  const { senhaAtual, novaSenha } = req.body;
+
+  try {
+    // 1. Busca a senha atual no banco
+    const user = await pool.query('SELECT senha FROM usuarios WHERE id = $1', [id]);
+    
+    if (user.rows[0].senha !== senhaAtual) {
+      return res.status(401).json({ error: "A senha atual está incorreta." });
+    }
+
+    // 2. Atualiza para a nova senha
+    await pool.query('UPDATE usuarios SET senha = $1 WHERE id = $2', [novaSenha, id]);
+    
+    res.json({ message: "Senha atualizada com sucesso!" });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao atualizar senha." });
+  }
+});
+
 // ==========================================
 //            ROTAS DE CHAMADOS
 // ==========================================
@@ -263,6 +307,23 @@ app.put('/chamados/:id/finalizar', async (req, res) => {
     res.json({ message: "Chamado finalizado!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// 7. REABRIR CHAMADO
+app.put('/chamados/:id/reabrir', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status_id } = req.body; // Recebe o novo status (geralmente 2 - Em Atendimento)
+
+    await pool.query(
+      'UPDATE chamados SET status_id = $1, data_fechamento = NULL WHERE id = $2',
+      [status_id, id]
+    );
+    
+    res.json({ message: "Chamado reaberto com sucesso!" });
+  } catch (err) {
+    res.status(500).json({ error: "Erro ao reabrir: " + err.message });
   }
 });
 

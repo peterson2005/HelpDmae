@@ -25,6 +25,8 @@ export default function DetalhesChamado() {
     const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "{}");
     const eAdminOuTecnico = usuarioLogado.perfil_id === 2 || usuarioLogado.perfil_id === 3;
 
+    const [openModalDesatribuir, setOpenModalDesatribuir] = useState(false);
+
     const buscarDadosChamado = useCallback(async () => {
         try {
             const resposta = await axios.get(`http://localhost:5000/chamados/${id}`);
@@ -170,6 +172,31 @@ export default function DetalhesChamado() {
 
     if (!chamado) return <Typography sx={{ p: 5 }}>Carregando...</Typography>;
 
+    const handleDesatribuirTecnico = async () => {
+        try {
+            // 1. Remove o tecnico_id no banco e volta status para 1 (Aberto)
+            await axios.put(`http://localhost:5000/chamados/${id}/atribuir`, {
+                tecnico_id: null,
+                status_id: 1
+            });
+
+            // 2. Registra no histórico
+            await axios.post(`http://localhost:5000/chamados/${id}/interacoes`, {
+                mensagem: `SISTEMA: O usuário ${usuarioLogado.nome} removeu o técnico responsável. O chamado voltou para o status ABERTO.`,
+                usuario_nome: "SISTEMA"
+            });
+
+            alert("Técnico removido com sucesso!");
+            setOpenModalDesatribuir(false); // Fechar o modal
+            setTecnicoSelecionado(""); // Limpar o select visual
+            buscarDadosChamado();
+            buscarComentarios();
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao desatribuir técnico.");
+        }
+    };
+
     return (
         <Box sx={{ backgroundColor: "#f1f5f9", minHeight: "100vh", py: 4 }}>
             <Container maxWidth="lg">
@@ -193,13 +220,10 @@ export default function DetalhesChamado() {
                         {eAdminOuTecnico && (
                             <Stack direction="row" spacing={2} alignItems="center">
                                 <TextField
-                                    select
-                                    size="small"
-                                    label="Técnico Responsável"
+                                    select size="small" label="Técnico Responsável"
                                     value={tecnicoSelecionado}
                                     onChange={(e) => setTecnicoSelecionado(e.target.value)}
                                     sx={{ minWidth: 220 }}
-                                    // TRAVA: Desabilita se já estiver finalizado OU se já tiver um técnico definido
                                     disabled={chamado.status_id === 3 || !!chamado.tecnico_id}
                                 >
                                     <MenuItem value="" disabled>Selecione um técnico...</MenuItem>
@@ -208,23 +232,26 @@ export default function DetalhesChamado() {
                                     ))}
                                 </TextField>
 
-                                <Button
-                                    variant="outlined"
-                                    startIcon={<AssignmentIndIcon />}
-                                    onClick={handleConfirmarAtribuicao}
-                                    // TRAVA: Desabilita o botão se já tiver um técnico
-                                    disabled={chamado.status_id === 3 || !!chamado.tecnico_id}
-                                >
-                                    {chamado.tecnico_id ? "Já Atribuído" : "Atribuir"}
-                                </Button>
-
-                                {/* Substitua o botão de Solucionar por este bloco */}
-                                {chamado.status_id === 3 ? (
+                                {!!chamado.tecnico_id && chamado.status_id !== 3 ? (
                                     <Button
-                                        variant="contained"
-                                        color="warning"
-                                        onClick={() => setOpenModalReabrir(true)}
+                                        size="small" color="error" variant="text"
+                                        onClick={() => setOpenModalDesatribuir(true)}
+                                        sx={{ fontSize: '0.7rem', textTransform: 'none' }}
                                     >
+                                        Desatribuir Técnico
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="outlined" startIcon={<AssignmentIndIcon />}
+                                        onClick={handleConfirmarAtribuicao}
+                                        disabled={chamado.status_id === 3 || !!chamado.tecnico_id}
+                                    >
+                                        Atribuir
+                                    </Button>
+                                )}
+
+                                {chamado.status_id === 3 ? (
+                                    <Button variant="contained" color="warning" onClick={() => setOpenModalReabrir(true)}>
                                         Reabrir Chamado
                                     </Button>
                                 ) : (
@@ -232,7 +259,10 @@ export default function DetalhesChamado() {
                                         variant="contained"
                                         color="success"
                                         onClick={() => setOpenModalSolucao(true)}
-                                        disabled={(!tecnicoSelecionado && !chamado.tecnico_id)}
+                                        disabled={
+                                            (!tecnicoSelecionado && !chamado.tecnico_id) || // Sem técnico
+                                            (usuarioLogado.perfil_id === 3 && chamado.tecnico_id !== usuarioLogado.id) // É técnico, mas não é o dono
+                                        }
                                     >
                                         Solucionar
                                     </Button>
@@ -279,7 +309,11 @@ export default function DetalhesChamado() {
                                         <Typography variant="body2" fontWeight="bold">
                                             {isSistema ? "Notificação do Sistema" : item.usuario_nome}
                                         </Typography>
-                                        <Typography variant="body2" sx={{ fontStyle: isSistema ? 'italic' : 'normal', mt: 0.5 }}>
+                                        <Typography variant="body2" sx={{
+                                            fontStyle: isSistema ? 'italic' : 'normal', mt: 0.5,
+                                            wordBreak: 'break-word',
+                                            overflowWrap: 'anywhere'
+                                        }}>
                                             {item.mensagem}
                                         </Typography>
                                     </Box>
@@ -313,25 +347,40 @@ export default function DetalhesChamado() {
                 </Dialog>
             </Container>
             <Dialog open={openModalReabrir} onClose={() => setOpenModalReabrir(false)} fullWidth maxWidth="sm">
-    <DialogTitle>Reabrir Chamado</DialogTitle>
-    <DialogContent>
-        <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
-            Explique o motivo pelo qual o problema não foi resolvido ou voltou a ocorrer.
-        </Typography>
-        <TextField 
-            fullWidth 
-            multiline 
-            rows={4} 
-            label="Motivo da Reabertura" 
-            value={motivoReabertura} 
-            onChange={(e) => setMotivoReabertura(e.target.value)}
-        />
-    </DialogContent>
-    <DialogActions sx={{ p: 3 }}>
-        <Button onClick={() => setOpenModalReabrir(false)}>Cancelar</Button>
-        <Button variant="contained" color="warning" onClick={handleReabrirChamado}>Confirmar Reabertura</Button>
-    </DialogActions>
-</Dialog>
+                <DialogTitle>Reabrir Chamado</DialogTitle>
+                <DialogContent>
+                    <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+                        Explique o motivo pelo qual o problema não foi resolvido ou voltou a ocorrer.
+                    </Typography>
+                    <TextField
+                        fullWidth
+                        multiline
+                        rows={4}
+                        label="Motivo da Reabertura"
+                        value={motivoReabertura}
+                        onChange={(e) => setMotivoReabertura(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions sx={{ p: 3 }}>
+                    <Button onClick={() => setOpenModalReabrir(false)}>Cancelar</Button>
+                    <Button variant="contained" color="warning" onClick={handleReabrirChamado}>Confirmar Reabertura</Button>
+                </DialogActions>
+            </Dialog>
+            <Dialog open={openModalDesatribuir} onClose={() => setOpenModalDesatribuir(false)}>
+                <DialogTitle>Confirmar Remoção</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Tem certeza que deseja remover o técnico <strong>{chamado.tecnico_nome}</strong> deste chamado?
+                        O status do chamado voltará para "Aberto".
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 3 }}>
+                    <Button onClick={() => setOpenModalDesatribuir(false)}>Cancelar</Button>
+                    <Button variant="contained" color="error" onClick={handleDesatribuirTecnico}>
+                        Confirmar e Remover
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
