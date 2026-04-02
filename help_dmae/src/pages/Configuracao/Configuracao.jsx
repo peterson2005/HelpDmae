@@ -20,26 +20,29 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 
 export default function Configuracao() {
-  
+
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "{}");
+
+  const [loading, setLoading] = useState(false);
 
   const [tabIndex, setTabIndex] = useState(0);
 
-  const theme = useTheme(); // Para saber qual o tema atual
-  const colorMode = useColorMode();
+  const theme = useTheme();
+  const { toggleColorMode } = useColorMode();
 
   const [senhas, setSenhas] = useState({
-  atual: '',
-  nova: '',
-  confirmar: ''
-});
+    atual: '',
+    nova: '',
+    confirmar: ''
+  });
 
   const [userFields, setUserFields] = useState([
-    { id: 'nome', label: 'Nome Completo', value: usuarioLogado.nome || '', icon: <PersonIcon /> },
-    { id: 'cargo', label: 'Cargo', value: usuarioLogado.cargo || '', icon: <WorkIcon /> },
-    { id: 'setor', label: 'Setor', value: usuarioLogado.setor || '', icon: <BusinessIcon /> },
-    { id: 'unidade', label: 'Unidade', value: usuarioLogado.unidade || '', icon: <LocationOnIcon /> },
-    { id: 'ramal', label: 'Ramal', value: usuarioLogado.ramal || '', icon: <PhoneIcon /> },
+    { id: 'nome', label: 'Nome Completo', value: usuarioLogado.nome || '' },
+    { id: 'matricula', label: 'Matrícula', value: usuarioLogado.matricula || '' },
+    { id: 'cargo', label: 'Cargo', value: usuarioLogado.cargo || '' },
+    { id: 'setor', label: 'Setor', value: usuarioLogado.setor || '' },
+    { id: 'unidade', label: 'Unidade', value: usuarioLogado.unidade || '' },
+    { id: 'ramal', label: 'Ramal', value: usuarioLogado.ramal || '' },
   ]);
 
   const handleTabChange = (event, newValue) => {
@@ -48,6 +51,7 @@ export default function Configuracao() {
 
   const handleSalvarPerfil = async () => {
     try {
+      setLoading(true);
       // Converte o array userFields em um objeto simples
       const dadosParaEnviar = userFields.reduce((acc, field) => {
         acc[field.id] = field.value;
@@ -73,33 +77,35 @@ export default function Configuracao() {
     } catch (error) {
       console.error("Erro ao salvar perfil:", error);
       alert("Erro ao atualizar perfil. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleAlterarSenha = async () => {
-  // Validações básicas
-  if (!senhas.atual || !senhas.nova || !senhas.confirmar) {
-    return alert("Preencha todos os campos de senha.");
-  }
-  if (senhas.nova !== senhas.confirmar) {
-    return alert("A nova senha e a confirmação não coincidem.");
-  }
-  if (senhas.nova.length < 3) {
-    return alert("A nova senha deve ter pelo menos 3 caracteres.");
-  }
+    // Validações básicas
+    if (!senhas.atual || !senhas.nova || !senhas.confirmar) {
+      return alert("Preencha todos os campos de senha.");
+    }
+    if (senhas.nova !== senhas.confirmar) {
+      return alert("A nova senha e a confirmação não coincidem.");
+    }
+    if (senhas.nova.length < 3) {
+      return alert("A nova senha deve ter pelo menos 3 caracteres.");
+    }
 
-  try {
-    const response = await axios.patch(`http://localhost:5000/usuarios/${usuarioLogado.id}/senha-config`, {
-      senhaAtual: senhas.atual,
-      novaSenha: senhas.nova
-    });
+    try {
+      const response = await axios.patch(`http://localhost:5000/usuarios/${usuarioLogado.id}/senha-config`, {
+        senhaAtual: senhas.atual,
+        novaSenha: senhas.nova
+      });
 
-    alert(response.data.message);
-    setSenhas({ atual: '', nova: '', confirmar: '' }); // Limpa os campos
-  } catch (error) {
-    alert(error.response?.data?.error || "Erro ao trocar senha.");
-  }
-};
+      alert(response.data.message);
+      setSenhas({ atual: '', nova: '', confirmar: '' }); // Limpa os campos
+    } catch (error) {
+      alert(error.response?.data?.error || "Erro ao trocar senha.");
+    }
+  };
 
 
   return (
@@ -144,21 +150,21 @@ export default function Configuracao() {
                 {userFields.map((field) => (
                   <Grid item xs={12} md={6} key={field.id}>
                     <TextField
-  fullWidth
-  label={field.label}
-  value={field.value}
-  variant="outlined"
-  // BLOQUEIO: Não deixa editar matrícula nem nome
-  disabled={field.id === 'matricula' || field.id === 'nome'} 
-  onChange={(e) => {
-    const newFields = userFields.map(f =>
-      f.id === field.id ? { ...f, value: e.target.value } : f
-    );
-    setUserFields(newFields);
-  }}
-  // Dica visual: Deixa o campo desabilitado com uma aparência levemente diferente
-  sx={{ "& .MuiInputBase-input.Mui-disabled": { WebkitTextFillColor: "#666" } }}
-/>
+                      fullWidth
+                      label={field.label}
+                      value={field.value}
+                      variant="outlined"
+                      // BLOQUEIO: Não deixa editar matrícula nem nome
+                      disabled={field.id === 'matricula' || field.id === 'nome'}
+                      onChange={(e) => {
+                        const newFields = userFields.map(f =>
+                          f.id === field.id ? { ...f, value: e.target.value } : f
+                        );
+                        setUserFields(newFields);
+                      }}
+                      // Dica visual: Deixa o campo desabilitado com uma aparência levemente diferente
+                      sx={{ "& .MuiInputBase-input.Mui-disabled": { WebkitTextFillColor: "#666" } }}
+                    />
                   </Grid>
                 ))}
               </Grid>
@@ -175,65 +181,65 @@ export default function Configuracao() {
 
           {/* ABA: SEGURANÇA (SENHA) */}
           {tabIndex === 1 && (
-  <Box>
-    <Typography variant="h6" fontWeight="bold" gutterBottom>Alterar Senha</Typography>
-    <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-      Para sua segurança, não compartilhe sua senha com terceiros.
-    </Typography>
-    
-    <Stack spacing={3} sx={{ mt: 2, maxWidth: 400 }}>
-      <TextField 
-        label="Senha Atual" 
-        type="password" 
-        fullWidth 
-        value={senhas.atual}
-        onChange={(e) => setSenhas({...senhas, atual: e.target.value})}
-      />
-      <TextField 
-        label="Nova Senha" 
-        type="password" 
-        fullWidth 
-        value={senhas.nova}
-        onChange={(e) => setSenhas({...senhas, nova: e.target.value})}
-      />
-      <TextField 
-        label="Confirmar Nova Senha" 
-        type="password" 
-        fullWidth 
-        value={senhas.confirmar}
-        onChange={(e) => setSenhas({...senhas, confirmar: e.target.value})}
-      />
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={handleAlterarSenha}
-        sx={{ width: 'fit-content' }}
-      >
-        Atualizar Senha
-      </Button>
-    </Stack>
-  </Box>
-)}
+            <Box>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>Alterar Senha</Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                Para sua segurança, não compartilhe sua senha com terceiros.
+              </Typography>
+
+              <Stack spacing={3} sx={{ mt: 2, maxWidth: 400 }}>
+                <TextField
+                  label="Senha Atual"
+                  type="password"
+                  fullWidth
+                  value={senhas.atual}
+                  onChange={(e) => setSenhas({ ...senhas, atual: e.target.value })}
+                />
+                <TextField
+                  label="Nova Senha"
+                  type="password"
+                  fullWidth
+                  value={senhas.nova}
+                  onChange={(e) => setSenhas({ ...senhas, nova: e.target.value })}
+                />
+                <TextField
+                  label="Confirmar Nova Senha"
+                  type="password"
+                  fullWidth
+                  value={senhas.confirmar}
+                  onChange={(e) => setSenhas({ ...senhas, confirmar: e.target.value })}
+                />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleAlterarSenha}
+                  sx={{ width: 'fit-content' }}
+                >
+                  Atualizar Senha
+                </Button>
+              </Stack>
+            </Box>
+          )}
 
           {/* ABA: PERSONALIZAÇÃO (MODO NOTURNO) */}
           {tabIndex === 2 && (
-    <Box>
-      <Typography variant="h6" fontWeight="bold" gutterBottom>Personalização</Typography>
-      <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-        Ajuste a aparência do sistema para o seu conforto.
-      </Typography>
-      <Divider sx={{ mb: 2 }} />
-      <FormControlLabel
-        control={
-          <Switch 
-            checked={theme.palette.mode === 'dark'} 
-            onChange={colorMode.toggleColorMode} 
-            color="primary" 
-          />
-        }
-        label={`Modo Noturno (${theme.palette.mode === 'dark' ? 'Ativado' : 'Desativado'})`}
-      />
-    </Box>
+            <Box>
+              <Typography variant="h6" fontWeight="bold" gutterBottom>Personalização</Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
+                Ajuste a aparência do sistema para o seu conforto.
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <FormControlLabel
+                control={
+                  <Switch 
+  checked={theme.palette.mode === 'dark'} 
+  onChange={toggleColorMode} // Use a função desestruturada
+  color="primary" 
+/>
+                }
+                label={`Modo Noturno (${theme.palette.mode === 'dark' ? 'Ativado' : 'Desativado'})`}
+              />
+            </Box>
           )}
 
           {/* ABA: NOTIFICAÇÕES */}

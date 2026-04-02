@@ -4,7 +4,7 @@ import axios from 'axios';
 import {
   Box, Typography, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Chip, IconButton,
-  TextField, InputAdornment, Stack, Button, Tooltip
+  TextField, InputAdornment, Stack, Button, Tooltip, TablePagination
 } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -44,7 +44,8 @@ export default function Chamados() {
       console.error("Erro ao buscar chamados:", error);
     }
   };
-
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   // Executa a busca assim que a tela abre
   useEffect(() => {
     carregarChamados();
@@ -58,6 +59,8 @@ export default function Chamados() {
       (chamado.solicitante_nome?.toLowerCase().includes(termoBusca.toLowerCase()));
 
     const matchesStatus = statusFiltro === "Todos" || chamado.status === statusFiltro;
+
+
 
     return matchesBusca && matchesStatus;
   });
@@ -125,12 +128,15 @@ export default function Chamados() {
           <Box sx={{ flexGrow: 1 }} /> {/* Empurra o botão de adicionar para o fim */}
 
           <Button variant="contained" startIcon={<AddIcon />} color="primary" sx={{ borderRadius: 2 }}>
+            Novo Chamado
+          </Button>
+          <Button variant="contained" startIcon={<AddIcon />} color="primary" sx={{ borderRadius: 2 }}>
             Adicionar Filtro
           </Button>
         </Box>
 
         {/* TABELA DE DADOS */}
-        <TableContainer>
+        <TableContainer sx={{ maxHeight: 600 }}>
           <Table sx={{ minWidth: 800 }}>
             <TableHead sx={{ bgcolor: "#f8f9fa" }}>
               <TableRow>
@@ -148,45 +154,78 @@ export default function Chamados() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {chamadosFiltrados.map((chamado) => (
-                <TableRow
-                  key={chamado.id}
-                  onClick={() => navigate(`/detalhes/${chamado.id}`)}
-                  sx={{
-                    cursor: 'pointer',
-                    '&:hover': {
-                      bgcolor: 'rgba(0, 0, 0, 0.04) !important',
-                    },
-                    transition: 'background-color 0.2s ease'
-                  }}
-                >
-                  <TableCell sx={{ fontWeight: 'bold' }}>#{chamado.id}</TableCell>
-                  <TableCell>{chamado.titulo}</TableCell>
-                  {/* CÉLULA CONDICIONAL: Deve seguir a mesma lógica do cabeçalho */}
-                  {usuario?.perfil_id !== 1 && (
-                    <TableCell>{chamado.solicitante_nome || "N/A"}</TableCell>
-                  )}
+              {chamadosFiltrados
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((chamado) => (
+                  <TableRow
 
-                  <TableCell>{chamado.categoria_nome || chamado.categoria}</TableCell>
-                  <TableCell>{chamado.data}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={chamado.status || "Sem Status"}
-                      size="small"
-                      sx={{
-                        bgcolor: chamado.cor || '#ccc',
-                        color: '#fff',
-                        borderRadius: 1.5,
-                        fontWeight: 'bold',
-                        minWidth: 100
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+                    key={chamado.id}
+                    onClick={() => navigate(`/detalhes/${chamado.id}`)}
+                    sx={{
+                      cursor: 'pointer',
+                      '&:hover': {
+                        bgcolor: 'rgba(0, 0, 0, 0.04) !important',
+                      },
+                      transition: 'background-color 0.2s ease'
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: 'bold' }}>#{chamado.id}</TableCell>
+                    <TableCell>{chamado.titulo}</TableCell>
+                    {/* CÉLULA CONDICIONAL: Deve seguir a mesma lógica do cabeçalho */}
+                    {usuario?.perfil_id !== 1 && (
+                      <TableCell>{chamado.solicitante_nome || "N/A"}</TableCell>
+                    )}
+
+                    <TableCell>{chamado.categoria_nome || chamado.categoria}</TableCell>
+                    <TableCell>{chamado.data}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={chamado.status || "Sem Status"}
+                        size="small"
+                        sx={{
+                          bgcolor: chamado.cor || '#ccc',
+                          color: '#fff',
+                          borderRadius: 1.5,
+                          fontWeight: 'bold',
+                          minWidth: 100
+                        }}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </TableContainer>
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={chamadosFiltrados.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={(event, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(event) => {
+            setRowsPerPage(parseInt(event.target.value, 10));
+            setPage(0);
+          }}
+          labelRowsPerPage="Linhas por página:"
+          // ESTILIZAÇÃO CUSTOMIZADA:
+          sx={{
+            bgcolor: "#f8faff", // Um azulzinho bem claro de fundo
+            borderTop: "1px solid",
+            borderColor: "divider",
+            color: "#1976d2", // Texto em azul
+            ".MuiTablePagination-toolbar": {
+              justifyContent: "center", // Centraliza o conteúdo
+              display: "flex",
+            },
+            ".MuiTablePagination-actions": {
+              color: "#1976d2", // Cor das setinhas
+            },
+            ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+              fontWeight: "bold",
+            }
+          }}
+        />
       </Paper>
     </Box>
   );

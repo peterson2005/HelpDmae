@@ -56,7 +56,7 @@ export default function Layout() {
     };
 
     return (
-        <Box sx={{ display: "flex", gap: 2, minHeight: "100vh" }}>
+        <Box sx={{overflow: "hidden",bgcolor: "#f4f6f8",height: "100vh", display: "flex", gap: 2, minHeight: "100vh",p: 1  }}>
 
             {/* SIDEBAR COM LARGURA DINÂMICA */}
             <Paper
