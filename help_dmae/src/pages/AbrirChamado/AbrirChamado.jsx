@@ -16,12 +16,12 @@ export default function AbrirChamado() {
 
   const [userFields, setUserFields] = useState([
     { id: 'nome', label: "Nome", value: "", isEditing: false },
-  { id: 'cargo', label: "Cargo", value: "", isEditing: false },
-  { id: 'setor', label: "Setor", value: "", isEditing: false },
-  { id: 'unidade', label: "Unidade", value: "", isEditing: false },
-  { id: 'ramal', label: "Ramal", value: "", isEditing: false },
+    { id: 'cargo', label: "Cargo", value: "", isEditing: false },
+    { id: 'setor', label: "Setor", value: "", isEditing: false },
+    { id: 'unidade', label: "Unidade", value: "", isEditing: false },
+    { id: 'ramal', label: "Ramal", value: "", isEditing: false },
   ]);
-  
+
 
   // Função para alternar entre texto e input
   const handleEditToggle = (id) => {
@@ -38,91 +38,91 @@ export default function AbrirChamado() {
   };
 
   const [formData, setFormData] = useState({
-  titulo: '',
-  descricao: '',
-  tipo: 'incidente',
-  impacto: 'eu',
-  categoria_id: 1,
-  usuario_id: null // Começa nulo porque ainda não sabemos quem logou
-});
+    titulo: '',
+    descricao: '',
+    tipo: 'incidente',
+    impacto: 'eu',
+    categoria_id: 1,
+    usuario_id: null // Começa nulo porque ainda não sabemos quem logou
+  });
 
   useEffect(() => {
-  // 1. Pega a string do crachá
-  const usuarioGuardado = localStorage.getItem("usuarioLogado");
+    // 1. Pega a string do crachá
+    const usuarioGuardado = localStorage.getItem("usuarioLogado");
 
-  if (usuarioGuardado) {
-    // 2. Transforma em objeto JS
-    const user = JSON.parse(usuarioGuardado);
+    if (usuarioGuardado) {
+      // 2. Transforma em objeto JS
+      const user = JSON.parse(usuarioGuardado);
 
-    // 3. Atualiza os campos visuais da esquerda
-    setUserFields([
-      { id: 'nome', label: "Nome", value: user.nome || "", isEditing: false },
-      { id: 'cargo', label: "Cargo", value: user.cargo || "", isEditing: false },
-      { id: 'setor', label: "Setor", value: user.setor || "", isEditing: false },
-      { id: 'unidade', label: "Unidade", value: user.unidade || "", isEditing: false },
-      { id: 'ramal', label: "Ramal", value: user.ramal || "", isEditing: false },
-    ]);
+      // 3. Atualiza os campos visuais da esquerda
+      setUserFields([
+        { id: 'nome', label: "Nome", value: user.nome || "", isEditing: false },
+        { id: 'cargo', label: "Cargo", value: user.cargo || "", isEditing: false },
+        { id: 'setor', label: "Setor", value: user.setor || "", isEditing: false },
+        { id: 'unidade', label: "Unidade", value: user.unidade || "", isEditing: false },
+        { id: 'ramal', label: "Ramal", value: user.ramal || "", isEditing: false },
+      ]);
 
-    // 4. Salva o ID do usuário no formulário para o banco saber de quem é o chamado
-    setFormData(prev => ({ ...prev, usuario_id: user.id }));
-    
-  } else {
-    // Se alguém tentar entrar sem logar, expulsa para o login
-    navigate("/login");
-  }
-}, [navigate]);
+      // 4. Salva o ID do usuário no formulário para o banco saber de quem é o chamado
+      setFormData(prev => ({ ...prev, usuario_id: user.id }));
+
+    } else {
+      // Se alguém tentar entrar sem logar, expulsa para o login
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // 1. Validações
-  if (!formData.titulo.trim() || !formData.descricao.trim()) {
-    alert("Por favor, preencha o título e a descrição do problema.");
-    return;
-  }
+    // 1. Validações
+    if (!formData.titulo.trim() || !formData.descricao.trim()) {
+      alert("Por favor, preencha o título e a descrição do problema.");
+      return;
+    }
 
-  // 2. Recuperar dados originais do usuário logado para o registro do sistema
-  const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "{}");
-  const nomeUsuarioAutenticado = usuarioLogado.nome || "Usuário Desconhecido";
+    // 2. Recuperar dados originais do usuário logado para o registro do sistema
+    const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado") || "{}");
+    const nomeUsuarioAutenticado = usuarioLogado.nome || "Usuário Desconhecido";
 
-  if (!formData.usuario_id) {
-    alert("Erro de autenticação. Por favor, faça login novamente.");
-    navigate("/login");
-    return;
-  }
+    if (!formData.usuario_id) {
+      alert("Erro de autenticação. Por favor, faça login novamente.");
+      navigate("/login");
+      return;
+    }
 
-  // Dados para a criação do chamado (podem ter sido editados nos campos da esquerda)
-  const dadosCompletos = {
-    ...formData,
-    solicitante_nome: userFields.find(f => f.id === 'nome').value,
-    solicitante_cargo: userFields.find(f => f.id === 'cargo').value,
-    solicitante_setor: userFields.find(f => f.id === 'setor').value,
-    solicitante_unidade: userFields.find(f => f.id === 'unidade').value,
-    solicitante_ramal: userFields.find(f => f.id === 'ramal').value,
+    // Dados para a criação do chamado (podem ter sido editados nos campos da esquerda)
+    const dadosCompletos = {
+      ...formData,
+      solicitante_nome: userFields.find(f => f.id === 'nome').value,
+      solicitante_cargo: userFields.find(f => f.id === 'cargo').value,
+      solicitante_setor: userFields.find(f => f.id === 'setor').value,
+      solicitante_unidade: userFields.find(f => f.id === 'unidade').value,
+      solicitante_ramal: userFields.find(f => f.id === 'ramal').value,
+    };
+
+    try {
+      // 1. Criar o chamado
+      const resposta = await axios.post('http://localhost:5000/chamados', dadosCompletos);
+      const novoId = resposta.data.id;
+
+      // 2. Registrar quem abriu usando o nome do USUÁRIO AUTENTICADO
+      await axios.post(`http://localhost:5000/chamados/${novoId}/interacoes`, {
+        mensagem: `SISTEMA: Chamado criado pelo usuário ${nomeUsuarioAutenticado}.`,
+        usuario_nome: "SISTEMA"
+      });
+
+      alert(`Chamado #${novoId} enviado com sucesso!`);
+      navigate('/chamados');
+    } catch (error) {
+      console.error("Erro ao abrir chamado:", error);
+      alert("Erro ao conectar com o servidor.");
+    }
   };
-
-  try {
-    // 1. Criar o chamado
-    const resposta = await axios.post('http://localhost:5000/chamados', dadosCompletos);
-    const novoId = resposta.data.id;
-
-    // 2. Registrar quem abriu usando o nome do USUÁRIO AUTENTICADO
-    await axios.post(`http://localhost:5000/chamados/${novoId}/interacoes`, {
-      mensagem: `SISTEMA: Chamado criado pelo usuário ${nomeUsuarioAutenticado}.`,
-      usuario_nome: "SISTEMA"
-    });
-
-    alert(`Chamado #${novoId} enviado com sucesso!`);
-    navigate('/chamados');
-  } catch (error) {
-    console.error("Erro ao abrir chamado:", error);
-    alert("Erro ao conectar com o servidor.");
-  }
-};
 
 
   const [arquivos, setArquivos] = useState([]);
-  const fileInputRef = useRef(null); 
+  const fileInputRef = useRef(null);
 
   const handleFileClick = () => {
     fileInputRef.current.click();
@@ -130,17 +130,11 @@ export default function AbrirChamado() {
 
   const handleFileChange = (e) => {
     const novosArquivos = Array.from(e.target.files);
-    setArquivos((prev) => [...prev, ...novosArquivos]); 
+    setArquivos((prev) => [...prev, ...novosArquivos]);
   };
 
   return (
-    <Box sx={{
-      p: { xs: 2, md: 4 },
-      backgroundColor: "#f4f6f8",
-      minHeight: "100vh",
-      display: "flex",
-      justifyContent: "center", 
-      alignItems: "flex-start"   
+    <Box sx={{flex: 1, overflowY: "auto"
     }}>
       {/* Aumentei o maxWidth para 1400px para ocupar mais a tela cheia */}
       <Paper elevation={3} sx={{ p: 5, borderRadius: 3, width: "100%", maxWidth: 1400 }}>
@@ -232,7 +226,8 @@ export default function AbrirChamado() {
           {/* COLUNA DIREITA: */}
           <Grid size={{ xs: 12, md: 6 }}>
             <Stack spacing={4}>
-              <Box>
+              <Box sx={{flex: 1, overflowY: "auto"
+              }}>
                 <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>Classificação e Impacto</Typography>
                 <TextField select fullWidth label="Tipo de Solicitação" value={formData.tipo}
                   onChange={(e) => setFormData({ ...formData, tipo: e.target.value })} defaultValue="incidente" sx={{ mb: 3 }}>
@@ -327,7 +322,7 @@ export default function AbrirChamado() {
           </Grid>
         </Grid>
 
-        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 3, mt: 8 }}>
+        <Box>
           <Button
             variant="outlined"
             size="large"
@@ -337,15 +332,15 @@ export default function AbrirChamado() {
             CANCELAR
           </Button>
           <Button
-  variant="contained"
-  size="large"
-  sx={{ px: 10, py: 1.5, fontWeight: 'bold', boxShadow: 4 }}
-  onClick={handleSubmit}
-  // Se o título ou descrição estiverem vazios, o botão trava
-  disabled={!formData.titulo.trim() || !formData.descricao.trim()}
->
-  ABRIR CHAMADO
-</Button>
+            variant="contained"
+            size="large"
+            sx={{ px: 10, py: 1.5, fontWeight: 'bold', boxShadow: 4 }}
+            onClick={handleSubmit}
+            // Se o título ou descrição estiverem vazios, o botão trava
+            disabled={!formData.titulo.trim() || !formData.descricao.trim()}
+          >
+            ABRIR CHAMADO
+          </Button>
         </Box>
       </Paper>
     </Box>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { 
-  Stack, Grid, Paper, Typography, Box, Avatar, 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip 
+import {
+  Stack, Grid, Paper, Typography, Box, Avatar,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip
 } from "@mui/material";
 import SettingsIcon from '@mui/icons-material/Settings';
 import PriorityHighIcon from '@mui/icons-material/PriorityHigh';
@@ -18,14 +18,14 @@ export default function Home() {
       .catch(err => console.error(err));
 
     axios.get("http://localhost:5000/chamados")
-      .then(res => setChamados(res.data.slice(0, 5))) 
+      .then(res => setChamados(res.data.slice(0, 5)))
       .catch(err => console.error(err));
   }, []);
 
   return (
     <Box sx={{ display: "flex", p: 4, backgroundColor: "#f5f7fa", minHeight: "100vh" }}>
       <Stack spacing={4} sx={{ flex: 1 }}>
-        
+
         {/* CARDS DASHBOARD */}
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
@@ -79,10 +79,10 @@ export default function Home() {
                     <TableCell>#{chamado.id}</TableCell>
                     <TableCell>{chamado.titulo}</TableCell>
                     <TableCell>
-                      <Chip 
-                        label={chamado.status} 
-                        size="small" 
-                        sx={{ bgcolor: chamado.cor, color: '#fff', fontWeight: 'bold' }} 
+                      <Chip
+                        label={chamado.status}
+                        size="small"
+                        sx={{ bgcolor: chamado.cor, color: '#fff', fontWeight: 'bold' }}
                       />
                     </TableCell>
                     <TableCell>{chamado.solicitante_nome || "N/A"}</TableCell>

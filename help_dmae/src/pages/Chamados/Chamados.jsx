@@ -46,7 +46,6 @@ export default function Chamados() {
   };
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  // Executa a busca assim que a tela abre
   useEffect(() => {
     carregarChamados();
   }, []);
@@ -65,7 +64,13 @@ export default function Chamados() {
     return matchesBusca && matchesStatus;
   });
   return (
-    <Box sx={{ p: 4, bgcolor: "#f4f6f8", minHeight: "100vh" }}>
+    <Box sx={{
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      p: 3,
+      boxSizing: "border-box"
+    }}>
       {/* Título da Página */}
       <Typography variant="h4" fontWeight="bold" sx={{ mb: 4, color: "#1c252e" }}>
         {usuario?.perfil_id === 1 ? "Minhas Solicitações" : "Fila de Atendimento"}
@@ -98,7 +103,17 @@ export default function Chamados() {
         />
       </Stack>
 
-      <Paper elevation={0} sx={{ borderRadius: 3, border: "1px solid", borderColor: "divider", overflow: "hidden" }}>
+      <Paper elevation={0}
+        sx={{
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "divider",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,        
+          minHeight: 0
+        }}>
 
         {/* BARRA DE FILTROS (Igual à imagem) */}
         <Box sx={{ p: 2, display: 'flex', gap: 2, alignItems: 'center', bgcolor: "#fff" }}>
@@ -136,7 +151,9 @@ export default function Chamados() {
         </Box>
 
         {/* TABELA DE DADOS */}
-        <TableContainer sx={{ maxHeight: 600 }}>
+        <TableContainer sx={{ flex: 1, overflowY: "auto", '& .MuiTableCell-stickyHeader': {
+        backgroundColor: "#f8f9fa",
+    } }}>
           <Table sx={{ minWidth: 800 }}>
             <TableHead sx={{ bgcolor: "#f8f9fa" }}>
               <TableRow>

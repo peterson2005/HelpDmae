@@ -1,16 +1,24 @@
 import { useState } from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
 import {
     Stack, Paper, Box, IconButton, InputBase,
     Badge, Avatar, Typography, Divider, List,
     ListItemButton, ListItemText, Menu,
-    MenuItem,
-    ListItemIcon
+    MenuItem, Tooltip,
+    ListItemIcon, Switch
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import Logout from '@mui/icons-material/Logout';
+import HomeIcon from '@mui/icons-material/Home';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import PeopleIcon from '@mui/icons-material/People';
+import SettingsIcon from '@mui/icons-material/Settings';
+
+
 
 export default function Layout() {
     const [open, setOpen] = useState(true);
@@ -21,7 +29,9 @@ export default function Layout() {
     const inicial = primeiroNome.charAt(0).toUpperCase();
 
     const isAdmin = String(dadosUsuario?.perfil_id) === "3";
-    
+
+    const location = useLocation();
+    const isActive = (path) => location.pathname === path;
 
     const toggleDrawer = () => {
         setOpen(!open);
@@ -32,12 +42,11 @@ export default function Layout() {
     const menuStyle = {
         p: 0,
         width: "100%",
-        maxWidth: 360,
-        borderRadius: 4,
-        border: "1px solid",
-        borderColor: "divider",
-        backgroundColor: "background.paper",
-        display: open ? "block" : "none",
+        borderRadius: 0,
+        backgroundColor: "transparent",
+        display: "block",
+        overflow: "hidden",
+        gap: 1.5
     };
     const [anchorEl, setAnchorEl] = useState(null);
     const openMenu = Boolean(anchorEl);
@@ -56,25 +65,42 @@ export default function Layout() {
     };
 
     return (
-        <Box sx={{overflow: "hidden",bgcolor: "#f4f6f8",height: "100vh", display: "flex", gap: 2, minHeight: "100vh",p: 1  }}>
+        <Box sx={{
+            display: "flex",
+            gap: 2,
+            minHeight: "100vh",
+            bgcolor: "#f4f6f8",
+            p: 1
+        }}>
 
             {/* SIDEBAR COM LARGURA DINÂMICA */}
             <Paper
                 sx={{
-                    width: open ? 160 : 60, // Muda a largura
-                    transition: "width 0.3s", // Animação suave
-                    height: "100vh",
-                    overflow: "hidden",
+                    width: open ? 180 : 60,
+                    transition: "width 0.3s",
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center"
+                    alignItems: "center",
+                    position: "sticky",
+                    top: 16,
+                    height: "calc(100vh - 32px)",
+                    overflowX: "hidden",
+                    overflowY: "auto"
+
                 }}
             >
                 {/* BOTÃO HAMBÚRGUER */}
-                <Box sx={{ p: 1, width: "100%", display: "flex", justifyContent: open ? "flex-end" : "center" }}>
-                    <IconButton onClick={toggleDrawer}>
-                        <MenuIcon fontSize="large" />
-                    </IconButton>
+
+                <Box sx={{
+                    p: 1, width: "100%", justifyContent: open, position: "sticky", top: 0,
+                    bgcolor: "inherit", justifyContent: "center",
+                    zIndex: 10
+                }}>
+                    <Tooltip title={!open ? "Menu" : ""} placement="right">
+                        <IconButton onClick={toggleDrawer}>
+                            <MenuIcon fontSize="large" />
+                        </IconButton>
+                    </Tooltip>
                 </Box>
 
                 <Box
@@ -82,43 +108,119 @@ export default function Layout() {
                         flex: 1,
                         width: "100%",
                         display: "flex",
-                        justifyContent: "center",
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
                         alignItems: "center",
-                        // Se fechado, não mostra a lista
-                        visibility: open ? "visible" : "hidden"
+                        pt: 2,
                     }}
                 >
                     <List sx={menuStyle} aria-label="menu">
-                        <ListItemButton onClick={() => navigate("/Home")}>
-                            <ListItemText primary="Home" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        <ListItemButton onClick={() => navigate("/chamados")}>
-                            <ListItemText primary="Chamados" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        <ListItemButton onClick={() => navigate("/abrir-chamado")}>
-                            <ListItemText primary="Abrir Chamado" />
-                        </ListItemButton>
-                        <Divider component="li" />
-                        {isAdmin && (
-                            <>
-                                <ListItemButton onClick={() => navigate("/usuarios")}>
-                                    <ListItemText primary="Usuários" />
+                        {[
+                            { text: "Home", icon: <HomeIcon />, path: "/Home" },
+                            { text: "Chamados", icon: <AssignmentIcon />, path: "/chamados" },
+                            { text: "Abrir Chamado", icon: <AddCircleIcon />, path: "/abrir-chamado" },
+                            ...(isAdmin ? [{ text: "Usuários", icon: <PeopleIcon />, path: "/usuarios" }] : []),
+                            { text: "Configurações", icon: <SettingsIcon />, path: "/configuracao" },
+                        ].map((item) => (
+                            <Tooltip key={item.text} title={!open ? item.text : ""} placement="right">
+                                <ListItemButton
+                                    onClick={() => navigate(item.path)}
+                                    selected={isActive(item.path)}
+                                    sx={{
+                                        justifyContent: open ? "initial" : "center",
+                                        px: 1.0,
+                                        py: 1.5,
+                                        backgroundColor: "transparent",
+                                        borderLeft: "4px solid transparent",
+                                        "&.Mui-selected": {
+                                            backgroundColor: "rgba(0, 123, 255, 0.08)",
+                                            borderLeft: "4px solid #007bff",
+                                            "& .MuiListItemIcon-root": {
+                                                color: "primary.main",
+                                            },
+                                            "& .MuiListItemText-primary": {
+                                                color: "primary.main",
+                                                fontWeight: "bold",
+                                            },
+                                        },
+                                        "&:hover": {
+                                            backgroundColor: "rgba(0, 0, 0, 0.07)",
+                                        },
+                                    }}
+                                >
+                                    <ListItemIcon
+                                        sx={{
+                                            minWidth: 0,
+                                            mr: open ? 2 : "auto",
+                                            justifyContent: "center",
+                                            color: isActive(item.path) ? "primary.main" : "inherit",
+                                        }}
+                                    >
+                                        {item.icon}
+                                    </ListItemIcon>
+                                    {open && <ListItemText primary={item.text} />}
                                 </ListItemButton>
-                                <Divider component="li" />
-                            </>
-                        )}
-                        <ListItemButton onClick={() => navigate("/configuracao")}>
-                            <ListItemText primary="Configurações" />
-                        </ListItemButton>
+                            </Tooltip>
+                        ))}
+
                     </List>
+                </Box>
+
+                {/* FIM DA SIDEBAR: MODO NOTURNO E SAIR */}
+                <Box sx={{ width: "100%", mt: "auto", pb: 2 }}>
+                    <Divider sx={{ mb: 1 }} />
+
+                    {/* SWITCH MODO NOTURNO */}
+                    <Tooltip title={!open ? "Alternar Tema" : ""} placement="right">
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: open ? "space-between" : "center",
+                                px: open ? 2.5 : 0,
+                                py: 1,
+                                minHeight: 48
+                            }}
+                        >
+                            <Box sx={{ display: "flex", alignItems: "center" }}>
+                                <ListItemIcon sx={{ minWidth: 0, mr: open ? 2 : 0, justifyContent: "center" }}>
+                                    <SettingsIcon color="action" />
+                                </ListItemIcon>
+                                {open && <ListItemText primary="Tema" />}
+                            </Box>
+
+                            {open && (
+                                <Switch
+                                    size="small"
+                                    onChange={(e) => console.log("Escuro:", e.target.checked)}
+                                />
+                            )}
+                        </Box>
+                    </Tooltip>
+
+                    {/* BOTÃO SAIR */}
+                    <Tooltip title={!open ? "Sair" : ""} placement="right">
+                        <ListItemButton
+                            onClick={handleLogout}
+                            sx={{
+                                justifyContent: open ? "initial" : "center",
+                                px: 2.5,
+                                color: "error.main",
+                                "&:hover": { bgcolor: "error.light", color: "white", "& .MuiListItemIcon-root": { color: "white" } }
+                            }}
+                        >
+                            <ListItemIcon sx={{ minWidth: 0, mr: open ? 2 : "auto", justifyContent: "center", color: "inherit" }}>
+                                <Logout />
+                            </ListItemIcon>
+                            {open && <ListItemText primary="Sair" />}
+                        </ListItemButton>
+                    </Tooltip>
                 </Box>
             </Paper>
 
             {/* CONTEÚDO PRINCIPAL */}
             <Stack spacing={3} sx={{ flex: 1, }}>
-                {/* BUSCA E USER */}
+                {/*USER */}
                 <Paper
                     elevation={0}
                     sx={{
@@ -128,53 +230,60 @@ export default function Layout() {
                         justifyContent: "space-between",
                         borderRadius: 3,
                         border: "1px solid",
-                        borderColor: "divider"
+                        borderColor: "divider",
+                        position: "sticky",
+                        top: 16,
+                        zIndex: 1000,
+                        bgcolor: "rgba(255, 255, 255, 0.9)",
+                        backdropFilter: "blur(4px)"
                     }}
                 >
-                    {/* Barra de Busca */}
-                    <Box sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        backgroundColor: "#f1f3f4",
-                        borderRadius: 2,
-                        px: 2,
-                        py: 0.5,
-                        width: "300px"
-                    }}>
-                        <SearchIcon sx={{ color: "text.secondary", fontSize: 20 }} />
-                        <InputBase
-                            placeholder="Search"
-                            sx={{ ml: 1, flex: 1, fontSize: "0.875rem" }}
-                        />
+
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+
+                        <Typography
+                            variant="h6"
+                            component="h1"
+                            sx={{
+                                fontWeight: 700,
+                                color: "primary.main",
+                                letterSpacing: "-0.5px",
+                                fontFamily: "'Poppins', sans-serif" // Se tiver essa fonte, fica excelente
+                            }}
+                        >
+                            HelpDmae
+                        </Typography>
                     </Box>
+
+
                     {/* Notificações e Perfil */}
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <IconButton size="small">
-                            <NotificationsNoneIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton size="small">
-                            <Badge variant="dot" color="error">
+                        <Tooltip title="Noticações" placement="right">
+                            <IconButton size="small">
                                 <NotificationsNoneIcon fontSize="small" />
-                            </Badge>
-                        </IconButton>
+                            </IconButton>
+                        </Tooltip>
+
 
                         <Divider orientation="vertical" flexItem sx={{ mx: 1, height: 24, alignSelf: "center" }} />
 
                         <Typography variant="body2" sx={{ mr: 1, fontWeight: 500, color: "text.secondary" }}>
                             Olá, {primeiroNome}!
                         </Typography>
-                        <IconButton
-                            onClick={handleClick} // Quando clica, abre o menu
-                            size="small"
-                            sx={{ ml: 1 }}
-                            aria-controls={openMenu ? 'account-menu' : undefined}
-                            aria-haspopup="true"
-                            aria-expanded={openMenu ? 'true' : undefined}
-                        >
-                            <Avatar sx={{ width: 32, height: 32, bgcolor: "#007bff", fontSize: "0.85rem" }}>
-                                {inicial}
-                            </Avatar>
-                        </IconButton>
+                        <Tooltip title={!open ? "Perfil" : ""} placement="right">
+                            <IconButton
+                                onClick={handleClick}
+                                size="small"
+                                sx={{ ml: 1 }}
+                                aria-controls={openMenu ? 'account-menu' : undefined}
+                                aria-haspopup="true"
+                                aria-expanded={openMenu ? 'true' : undefined}
+                            >
+                                <Avatar sx={{ width: 32, height: 32, bgcolor: "#007bff", fontSize: "0.85rem" }}>
+                                    {inicial}
+                                </Avatar>
+                            </IconButton>
+                        </Tooltip>
                     </Box>
                 </Paper>
 
