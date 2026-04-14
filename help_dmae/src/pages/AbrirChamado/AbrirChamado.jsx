@@ -10,6 +10,7 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import ComputerIcon from '@mui/icons-material/Computer';
 import CodeIcon from '@mui/icons-material/Code';
 import EditIcon from '@mui/icons-material/Edit';
+import { CenterFocusStrong } from '@mui/icons-material';
 
 export default function AbrirChamado() {
   const navigate = useNavigate();
@@ -134,10 +135,14 @@ export default function AbrirChamado() {
   };
 
   return (
-    <Box sx={{flex: 1, overflowY: "auto"
+    <Box sx={{flex: 1, 
+      display: "flex", 
+      justifyContent: "center",
+      alignItems: "flex-start",
+      p: 2,
+      overflowY: "auto"
     }}>
-      {/* Aumentei o maxWidth para 1400px para ocupar mais a tela cheia */}
-      <Paper elevation={3} sx={{ p: 5, borderRadius: 3, width: "100%", maxWidth: 1400 }}>
+      <Paper elevation={3} sx={{ p: 5, borderRadius: 3, width: "100%", maxWidth: 1100 }}>
 
         <Box sx={{ textAlign: "center", mb: 6 }}>
           <Typography variant="h4" fontWeight="bold" sx={{ color: '#1c252e' }}>
@@ -150,8 +155,8 @@ export default function AbrirChamado() {
 
         <Grid container spacing={6} justifyContent="center">
 
-          {/* COLUNA ESQUERDA: Agora com md={6} para ficar equilibrado */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          {/* COLUNA ESQUERDA */}
+          <Grid size={{ xs: 12, md: 7 }}>
             <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
               Informações do Solicitante
             </Typography>
@@ -224,7 +229,7 @@ export default function AbrirChamado() {
           </Grid>
 
           {/* COLUNA DIREITA: */}
-          <Grid size={{ xs: 12, md: 6 }}>
+          <Grid size={{ xs: 12, md: 5 }}>
             <Stack spacing={4}>
               <Box sx={{flex: 1, overflowY: "auto"
               }}>
@@ -322,7 +327,7 @@ export default function AbrirChamado() {
           </Grid>
         </Grid>
 
-        <Box>
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 3, m: 2 }}>
           <Button
             variant="outlined"
             size="large"

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import axios from 'axios';
+import API_URL from "../../api.js";
 import {
   Box, Typography, Paper, Table, TableBody, TableCell,
   TableContainer, TableHead, TableRow, Chip, IconButton,
@@ -225,18 +226,17 @@ export default function Chamados() {
             setPage(0);
           }}
           labelRowsPerPage="Linhas por página:"
-          // ESTILIZAÇÃO CUSTOMIZADA:
           sx={{
-            bgcolor: "#f8faff", // Um azulzinho bem claro de fundo
+            bgcolor: "#f8faff", 
             borderTop: "1px solid",
             borderColor: "divider",
-            color: "#1976d2", // Texto em azul
+            color: "#1976d2", 
             ".MuiTablePagination-toolbar": {
-              justifyContent: "center", // Centraliza o conteúdo
+              justifyContent: "center", 
               display: "flex",
             },
             ".MuiTablePagination-actions": {
-              color: "#1976d2", // Cor das setinhas
+              color: "#1976d2", 
             },
             ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
               fontWeight: "bold",

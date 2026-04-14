@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../../api.js";
 import {
   Box, Paper, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Typography, Button, Stack, IconButton, Chip, 
-  TextField, InputAdornment, Menu, MenuItem, ListItemIcon, ListItemText,
-  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions 
+  TableHead, TableRow, Typography, Button, Stack, IconButton, Chip,
+  TextField, InputAdornment, Menu, MenuItem, ListItemIcon, ListItemText, TablePagination,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -16,23 +17,31 @@ import LockResetIcon from "@mui/icons-material/LockReset";
 export default function Usuarios() {
   const navigate = useNavigate();
   const [usuarios, setUsuarios] = useState([]);
-  const [open, setOpen] = useState(false);
   const [busca, setBusca] = useState("");
   const [anchorEl, setAnchorEl] = useState(null);
   const [usuarioSelecionado, setUsuarioSelecionado] = useState(null);
-  const [openSenha, setOpenSenha] = useState(false); // Controla o Modal
-  const [novaSenha, setNovaSenha] = useState(""); // Guarda a nova senha
+  const [openSenha, setOpenSenha] = useState(false);
+  const [novaSenha, setNovaSenha] = useState("");
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  // Busca os usuários no Back-end
   useEffect(() => {
-    fetch("http://localhost:5000/usuarios")
-      .then((res) => res.json())
-      .then((data) => setUsuarios(data))
-      .catch((err) => console.error("Erro ao buscar usuários:", err));
-  }, []);
+  fetch(`${API_URL}/usuarios`) 
+    .then((res) => res.json())
+    .then((data) => setUsuarios(data))
+    .catch((err) => console.error("Erro:", err));
+}, []);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const handleOpenMenu = (event, user) => {
     setAnchorEl(event.currentTarget);
@@ -41,7 +50,6 @@ export default function Usuarios() {
 
   const handleCloseMenu = () => {
     setAnchorEl(null);
-    setUsuarioSelecionado(null);
   };
 
   const handleExcluir = async (id) => {
@@ -55,10 +63,28 @@ export default function Usuarios() {
     }
   };
 
+  const handleAlterarSenha = async () => {
+    if (!novaSenha) return alert("Digite uma nova senha");
+    try {
+      const response = await fetch(`http://localhost:5000/usuarios/${usuarioSelecionado.id}/senha`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senha: novaSenha })
+      });
+
+      if (response.ok) {
+        alert("Senha alterada com sucesso!");
+        setOpenSenha(false);
+        setNovaSenha("");
+      }
+    } catch (err) {
+      alert("Erro ao alterar senha");
+    }
+  };
+
+  // Filtragem dos usuários
   const usuariosFiltrados = usuarios.filter((user) => {
     const termo = busca.toLowerCase();
-
-
     return (
       user.nome?.toLowerCase().includes(termo) ||
       user.matricula?.toString().includes(termo) ||
@@ -75,29 +101,7 @@ export default function Usuarios() {
       2: { label: "Técnico", color: "primary" },
       3: { label: "Admin", color: "secondary" },
     };
-
-
     return perfis[id] || { label: "Comum", color: "default" };
-  };
-
-  const handleAlterarSenha = async () => {
-    if (!novaSenha) return alert("Digite uma nova senha");
-
-    try {
-      const response = await fetch(`http://localhost:5000/usuarios/${usuarioSelecionado.id}/senha`, {
-        method: 'PATCH', // Usamos PATCH para atualizações parciais
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ senha: novaSenha })
-      });
-
-      if (response.ok) {
-        alert("Senha alterada com sucesso!");
-        setOpenSenha(false);
-        setNovaSenha("");
-      }
-    } catch (err) {
-      alert("Erro ao alterar senha");
-    }
   };
 
   return (
@@ -107,7 +111,6 @@ export default function Usuarios() {
         <Typography variant="h5" sx={{ fontWeight: "bold", color: "#333" }}>
           Gerenciamento de Usuários
         </Typography>
-
 
         <Button
           variant="contained"
@@ -125,13 +128,16 @@ export default function Usuarios() {
         </Button>
       </Stack>
 
-      {/* --- CAMPO DE PESQUISA --- */}
+      {/* Pesquisa */}
       <TextField
         fullWidth
         variant="outlined"
         placeholder="Pesquisar por nome, matrícula, setor, ramal..."
         value={busca}
-        onChange={(e) => setBusca(e.target.value)}
+        onChange={(e) => {
+            setBusca(e.target.value);
+            setPage(0); 
+        }}
         sx={{ mb: 3, backgroundColor: "#fff" }}
         InputProps={{
           startAdornment: (
@@ -142,8 +148,7 @@ export default function Usuarios() {
         }}
       />
 
-      {/* Tabela de Usuários */}
-      <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: "0px 4px 20px rgba(0,0,0,0.05)" }}>
+      <TableContainer component={Paper} sx={{ borderRadius: "12px 12px 0 0", boxShadow: "0px 4px 20px rgba(0,0,0,0.05)" }}>
         <Table sx={{ minWidth: 650 }}>
           <TableHead sx={{ backgroundColor: "#f8f9fa" }}>
             <TableRow>
@@ -158,40 +163,54 @@ export default function Usuarios() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {usuariosFiltrados.map((user) => (
-              <TableRow
-                key={user.id}
-                hover
-                onClick={() => console.log("Abrir edição do usuário:", user)}
-                sx={{ cursor: 'pointer' }}
-              >
-                {/* Colunas de Dados reais */}
-                <TableCell>{user.matricula}</TableCell>
-                <TableCell sx={{ fontWeight: 500 }}>{user.nome}</TableCell>
-                <TableCell>{user.cargo || "-"}</TableCell>
-                <TableCell>{user.ramal || "-"}</TableCell>
-                <TableCell>{user.setor || "-"}</TableCell>
-                <TableCell>{user.unidade || "-"}</TableCell>
-                <TableCell>
-                  <Chip
-                    label={getPerfilLabel(user.perfil_id).label}
-                    color={getPerfilLabel(user.perfil_id).color}
-                    size="small"
-                  />
-                </TableCell>
-
-                {/* Coluna de Ações (Menu) */}
-                <TableCell align="center" onClick={(e) => e.stopPropagation()}>
-                  <IconButton onClick={(e) => handleOpenMenu(e, user)}>
-                    <MoreVertIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-
+            {usuariosFiltrados
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((user) => (
+                <TableRow key={user.id} hover sx={{ cursor: 'pointer' }}>
+                  <TableCell>{user.matricula}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>{user.nome}</TableCell>
+                  <TableCell>{user.cargo || "-"}</TableCell>
+                  <TableCell>{user.ramal || "-"}</TableCell>
+                  <TableCell>{user.setor || "-"}</TableCell>
+                  <TableCell>{user.unidade || "-"}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={getPerfilLabel(user.perfil_id).label}
+                      color={getPerfilLabel(user.perfil_id).color}
+                      size="small"
+                    />
+                  </TableCell>
+                  <TableCell align="center" onClick={(e) => e.stopPropagation()}>
+                    <IconButton onClick={(e) => handleOpenMenu(e, user)}>
+                      <MoreVertIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Paginação ligada ao container */}
+      <TablePagination
+        component="div"
+        count={usuariosFiltrados.length}
+        page={page}
+        onPageChange={handleChangePage}
+        rowsPerPage={rowsPerPage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        labelRowsPerPage="Usuários por página:"
+        labelDisplayedRows={({ from, to, count }) => `${from}-${to} de ${count}`}
+        sx={{
+          backgroundColor: "#fff",
+          borderBottomLeftRadius: 12,
+          borderBottomRightRadius: 12,
+          border: '1px solid #e0e0e0',
+          borderTop: 'none'
+        }}
+      />
+
+      {/* Menu de Ações */}
       <Menu
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
@@ -205,26 +224,24 @@ export default function Usuarios() {
           <ListItemText>Editar Usuário</ListItemText>
         </MenuItem>
         <MenuItem onClick={() => {
-          setOpenSenha(true); // Abre o modal
-          setAnchorEl(null);  // Fecha o menu de bolinhas, mas NÃO limpa o usuarioSelecionado ainda
+          setOpenSenha(true);
+          setAnchorEl(null);
         }}>
           <ListItemIcon><LockResetIcon fontSize="small" /></ListItemIcon>
           <ListItemText>Alterar Senha</ListItemText>
         </MenuItem>
-
         <MenuItem onClick={() => { handleExcluir(usuarioSelecionado.id); handleCloseMenu(); }} sx={{ color: 'error.main' }}>
           <ListItemIcon><DeleteIcon fontSize="small" color="error" /></ListItemIcon>
           <ListItemText>Excluir Usuário</ListItemText>
         </MenuItem>
       </Menu>
-      {/* Modal de Alterar Senha */}
+
+      {/* Modal Alterar Senha */}
       <Dialog open={openSenha} onClose={() => setOpenSenha(false)}>
-        <DialogTitle sx={{ fontWeight: 'bold', color: '#1976d2' }}>
-          Alterar Senha
-        </DialogTitle>
+        <DialogTitle sx={{ fontWeight: 'bold', color: '#1976d2' }}>Alterar Senha</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 2 }}>
-          Usuário: <strong>{usuarioSelecionado?.nome}</strong>
+            Usuário: <strong>{usuarioSelecionado?.nome}</strong>
           </DialogContentText>
           <TextField
             autoFocus
@@ -239,11 +256,7 @@ export default function Usuarios() {
         </DialogContent>
         <DialogActions sx={{ p: 3 }}>
           <Button onClick={() => setOpenSenha(false)} color="inherit">Cancelar</Button>
-          <Button
-            onClick={handleAlterarSenha}
-            variant="contained"
-            startIcon={<LockResetIcon />}
-          >
+          <Button onClick={handleAlterarSenha} variant="contained" startIcon={<LockResetIcon />}>
             SALVAR
           </Button>
         </DialogActions>
