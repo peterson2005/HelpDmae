@@ -22,30 +22,29 @@ const pool = new Pool({
 app.post('/login', async (req, res) => {
   try {
     const { matricula, senha } = req.body;
+    
+    // Mudamos a consulta para verificar a senha usando a função crypt do Postgres
     const result = await pool.query(
-      'SELECT id, nome, senha, cargo, unidade, setor, ramal, perfil_id FROM usuarios WHERE matricula = $1',
-      [matricula]
+      `SELECT id, nome, cargo, unidade, setor, ramal, perfil_id 
+       FROM usuarios 
+       WHERE matricula = $1 
+       AND senha = crypt($2, senha)`, 
+      [matricula, senha]
     );
 
     const usuario = result.rows[0];
-    if (!usuario) return res.status(401).json({ error: 'Matrícula ou senha inválidos' });
 
-    const senhaValida = (senha === usuario.senha);
-    if (!senhaValida) return res.status(401).json({ error: 'Matrícula ou senha inválidos' });
+    // Se o crypt não bater, o result.rows virá vazio
+    if (!usuario) {
+      return res.status(401).json({ error: 'Matrícula ou senha inválidos' });
+    }
 
     res.json({
       message: 'Login realizado com sucesso!',
-      user: {
-        id: usuario.id,
-        nome: usuario.nome,
-        perfil_id: usuario.perfil_id,
-        setor: usuario.setor,
-        unidade: usuario.unidade,
-        cargo: usuario.cargo,
-        ramal: usuario.ramal
-      }
+      user: usuario
     });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Erro interno no servidor' });
   }
 });
@@ -97,10 +96,13 @@ app.get('/usuarios/:id', async (req, res) => {
 app.post('/usuarios', async (req, res) => {
   try {
     const { matricula, nome, senha, cargo, ramal, setor, unidade, perfil_id } = req.body;
+    
     const querySQL = `
       INSERT INTO usuarios (matricula, nome, senha, cargo, ramal, setor, unidade, perfil_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, nome
+      VALUES ($1, $2, crypt($3, gen_salt('bf')), $4, $5, $6, $7, $8) 
+      RETURNING id, nome
     `;
+    
     const result = await pool.query(querySQL, [matricula, nome, senha, cargo, ramal, setor, unidade, perfil_id]);
     res.status(201).json({ message: 'Usuário criado!', user: result.rows[0] });
   } catch (err) {
@@ -129,7 +131,13 @@ app.patch('/usuarios/:id/senha', async (req, res) => {
   try {
     const { id } = req.params;
     const { senha } = req.body;
-    await pool.query('UPDATE usuarios SET senha = $1 WHERE id = $2', [senha, id]);
+    
+    // Atualiza usando hash
+    await pool.query(
+      "UPDATE usuarios SET senha = crypt($1, gen_salt('bf')) WHERE id = $2", 
+      [senha, id]
+    );
+    
     res.json({ message: "Senha atualizada!" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -174,18 +182,25 @@ app.patch('/usuarios/:id/senha-config', async (req, res) => {
   const { senhaAtual, novaSenha } = req.body;
 
   try {
-    // 1. Busca a senha atual no banco
-    const user = await pool.query('SELECT senha FROM usuarios WHERE id = $1', [id]);
+    // 1. Verifica se a senha atual bate com o hash do banco
+    const user = await pool.query(
+      'SELECT id FROM usuarios WHERE id = $1 AND senha = crypt($2, senha)', 
+      [id, senhaAtual]
+    );
     
-    if (user.rows[0].senha !== senhaAtual) {
+    if (user.rows.length === 0) {
       return res.status(401).json({ error: "A senha atual está incorreta." });
     }
 
-    // 2. Atualiza para a nova senha
-    await pool.query('UPDATE usuarios SET senha = $1 WHERE id = $2', [novaSenha, id]);
+    // 2. Atualiza para a nova senha gerando um novo HASH
+    await pool.query(
+      "UPDATE usuarios SET senha = crypt($1, gen_salt('bf')) WHERE id = $2", 
+      [novaSenha, id]
+    );
     
     res.json({ message: "Senha atualizada com sucesso!" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Erro ao atualizar senha." });
   }
 });

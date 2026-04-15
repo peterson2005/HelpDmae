@@ -13,6 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import LockResetIcon from "@mui/icons-material/LockReset";
+import { blue } from "@mui/material/colors";
 
 export default function Usuarios() {
   const navigate = useNavigate();
@@ -206,7 +207,7 @@ export default function Usuarios() {
           borderBottomLeftRadius: 12,
           borderBottomRightRadius: 12,
           border: '1px solid #e0e0e0',
-          borderTop: 'none'
+          borderTop: 'none',
         }}
       />
 

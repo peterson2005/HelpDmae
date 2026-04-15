@@ -44,19 +44,22 @@ export default function Login() {
   return (
     <Box
   sx={{
-    minHeight: "100vh",
-    width: "100vw",
-    backgroundImage: "url(/src/img/fundo3.png)",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    margin: 0,
-    padding: 0,
-    overflow: "hidden",
-    position: "relative",
+      height: "100vh",
+      width: "100vw",
+      backgroundImage: "url(/src/img/fundo3.png)",
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      backgroundAttachment: "fixed",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: 0,
+      padding: 0,
+      overflow: "hidden",
+      position: "fixed",
+      top: 0,
+      left: 0,
   }}
 >
       {/* Overlay escuro */}
@@ -131,7 +134,7 @@ export default function Login() {
           </Box>
 
           <Button
-            type="submit" // Este tipo já avisa ao formulário para executar o handleSubmit
+            type="submit"
             fullWidth
             size="large"
             variant="contained"

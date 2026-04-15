@@ -12,58 +12,54 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import AddIcon from '@mui/icons-material/Add';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-
 export default function Chamados() {
-
   const navigate = useNavigate();
-  // Dados fictícios baseados nas suas imagens
-  const [chamados, setChamados] = useState([]); // Começa com lista vazia
+  
+  // ESTADOS DO COMPONENTE
+  const [chamados, setChamados] = useState([]); 
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [termoBusca, setTermoBusca] = useState(""); // Faltava este!
+  const [statusFiltro, setStatusFiltro] = useState("Todos"); // Faltava este!
 
   const usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
-  // Função que busca os dados no seu servidor Node.js
+
   const carregarChamados = async () => {
     try {
-      // 1. Pegamos o usuário logado para saber quem ele é
-      const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
-
-      if (!usuarioLogado) {
+      if (!usuario) {
         navigate("/login");
         return;
       }
 
-      // 2. Enviamos o usuario_id e o perfil_id para o servidor
-      const resposta = await axios.get('http://localhost:5000/chamados', {
+      const resposta = await axios.get(`${API_URL}/chamados`, {
         params: {
-          usuario_id: usuarioLogado.id,
-          perfil_id: usuarioLogado.perfil_id
+          usuario_id: usuario.id,
+          perfil_id: usuario.perfil_id
         }
       });
 
-      // 3. O servidor já deve retornar os dados filtrados
       setChamados(resposta.data);
     } catch (error) {
       console.error("Erro ao buscar chamados:", error);
     }
   };
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+
   useEffect(() => {
     carregarChamados();
   }, []);
 
-  const [termoBusca, setTermoBusca] = useState("");
-  const [statusFiltro, setStatusFiltro] = useState("Todos");
+  // LÓGICA DE FILTRAGEM
   const chamadosFiltrados = chamados.filter((chamado) => {
-    const matchesBusca = chamado.titulo.toLowerCase().includes(termoBusca.toLowerCase()) ||
-      chamado.id.toString().includes(termoBusca) ||
-      (chamado.solicitante_nome?.toLowerCase().includes(termoBusca.toLowerCase()));
+    const matchesBusca = 
+      chamado.titulo?.toLowerCase().includes(termoBusca.toLowerCase()) ||
+      chamado.id?.toString().includes(termoBusca) ||
+      chamado.solicitante_nome?.toLowerCase().includes(termoBusca.toLowerCase());
 
     const matchesStatus = statusFiltro === "Todos" || chamado.status === statusFiltro;
 
-
-
     return matchesBusca && matchesStatus;
   });
+
   return (
     <Box sx={{
       height: "100%",
@@ -112,7 +108,7 @@ export default function Chamados() {
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          flex: 1,        
+          flex: 1,
           minHeight: 0
         }}>
 
@@ -143,7 +139,13 @@ export default function Chamados() {
 
           <Box sx={{ flexGrow: 1 }} /> {/* Empurra o botão de adicionar para o fim */}
 
-          <Button variant="contained" startIcon={<AddIcon />} color="primary" sx={{ borderRadius: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            color="primary"
+            sx={{ borderRadius: 2 }}
+            onClick={() => navigate("/abrir-chamado")}
+          >
             Novo Chamado
           </Button>
           <Button variant="contained" startIcon={<AddIcon />} color="primary" sx={{ borderRadius: 2 }}>
@@ -152,9 +154,11 @@ export default function Chamados() {
         </Box>
 
         {/* TABELA DE DADOS */}
-        <TableContainer sx={{ flex: 1, overflowY: "auto", '& .MuiTableCell-stickyHeader': {
-        backgroundColor: "#f8f9fa",
-    } }}>
+        <TableContainer sx={{
+          flex: 1, overflowY: "auto", '& .MuiTableCell-stickyHeader': {
+            backgroundColor: "#f8f9fa",
+          }
+        }}>
           <Table sx={{ minWidth: 800 }}>
             <TableHead sx={{ bgcolor: "#f8f9fa" }}>
               <TableRow>
@@ -227,16 +231,16 @@ export default function Chamados() {
           }}
           labelRowsPerPage="Linhas por página:"
           sx={{
-            bgcolor: "#f8faff", 
+            bgcolor: "#f8faff",
             borderTop: "1px solid",
             borderColor: "divider",
-            color: "#1976d2", 
+            color: "#1976d2",
             ".MuiTablePagination-toolbar": {
-              justifyContent: "center", 
+              justifyContent: "center",
               display: "flex",
             },
             ".MuiTablePagination-actions": {
-              color: "#1976d2", 
+              color: "#1976d2",
             },
             ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
               fontWeight: "bold",
