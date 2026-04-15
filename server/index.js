@@ -15,6 +15,15 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+
+
+
+const dashboardRoutes = require('./rotas/dashboard');
+
+// ... outros middlewares
+app.use('/dashboard', dashboardRoutes);
+
+
 // ==========================================
 //            ROTAS DE LOGIN
 // ==========================================
