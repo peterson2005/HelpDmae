@@ -18,7 +18,7 @@ const pool = new Pool({
 
 
 
-const dashboardRoutes = require('./rotas/dashboard');
+const dashboardRouter = require('./Rotas_temp/dashboard');
 
 // ... outros middlewares
 app.use('/dashboard', dashboardRoutes);
